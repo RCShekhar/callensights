@@ -1,0 +1,15 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.9
+  build:
+    commands:
+      # Install dependencies
+      - pip install -r requirements.txt
+  post_build:
+    commands:
+      # Deploy to AWS Elastic Beanstalk
+      - aws elasticbeanstalk create-application-version --application-name your-application-name --version-label $CODEBUILD_RESOLVED_SOURCE_VERSION --source-bundle S3Bucket=your-s3-bucket-name,S3Key=$CODEBUILD_RESOLVED_SOURCE_VERSION.zip
+      - aws elasticbeanstalk update-environment --environment-name your-environment-name --version-label $CODEBUILD_RESOLVED_SOURCE_VERSION
