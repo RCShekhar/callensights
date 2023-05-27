@@ -23,7 +23,7 @@ def upload():
         return jsonify({'error': 'No file selected'})
 
     # Upload file to S3
-    s3_client.upload_fileobj(file, 'your-s3-bucket-name', file.filename)
+    s3_client.upload_fileobj(file, 'callensinghts-audio', file.filename)
 
     return jsonify({'message': 'Upload successful'})
 
