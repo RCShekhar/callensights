@@ -9,12 +9,7 @@ phases:
     commands:
       # Install dependencies
       - pip install -r requirements.txt
-  post_build:
-    commands:
-      # Deploy to AWS Elastic Beanstalk
-      - aws elasticbeanstalk create-application-version --application-name callensights --version-label $CODEBUILD_RESOLVED_SOURCE_VERSION --source-bundle S3Bucket=callensights-audio,S3Key=$CODEBUILD_RESOLVED_SOURCE_VERSION.zip
-      - aws elasticbeanstalk update-environment --environment-name callensights-env --version-label $CODEBUILD_RESOLVED_SOURCE_VERSION
-
+  
 artifacts:
   files:
     - '**/*'
