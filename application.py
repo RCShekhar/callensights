@@ -1,9 +1,20 @@
-import os
-import io
 import boto3 as aws
-from flask_app import app
+from flask_app import app as application
 from flask import Flask, request, jsonify
-from werkzeug.utils import secure_filename
+
+APP_NAME='Callensights.com'
+
+application = Flask(APP_NAME.split('.')[0])
+application.config.from_prefixed_env('CANS')
+application.secret_key = "secret key"
+application.config['MAX_CONTENT_LENGTH'] = 3 * 1024 * 1024 * 1024
+application.config['AUDIO_BUCKET']='callensights-audio'
+application.config['FEEDBACK_BUCKET']='callensights-transcript'
+
+application.config['RAW_AUDIO_PATH']=application.config['AUDIO_BUCKET'] + '/raw_audio'
+application.config['DENOISED_AUDIO_PATH']=application.config['AUDIO_BUCKET'] + '/denoised_audio'
+application.config['TRANSCRIPT_PATH']=application.config['FEEDBACK_BUCKET'] + '/transcript'
+application.config['FEEDBACK_PATH']=application.config['FEEDBACK_BUCKET']+ '/feedback'
 
 ALLOWED_EXTENSIONS = set(['wav', 'mp3', 'm4a'])
 
@@ -12,12 +23,12 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Home page route
-@app.route('/', methods=['GET'])
+@application.route('/', methods=['GET'])
 def home_page():
     return jsonify("Welcom to Callensights!!")
 
 # Upload audio file api end point
-@app.route('/file-upload', methods=['POST'])
+@application.route('/file-upload', methods=['POST'])
 def upload_file():
     # check if the post request has the file part
 
@@ -41,16 +52,16 @@ def upload_file():
         # if alloed audio file then load the file into GCS
         try:
             s3 = aws.client('s3')
-            print(f'Bucket selected {app.config["AUDIO_BUCKET"]}')           
+            print(f'Bucket selected {application.config["AUDIO_BUCKET"]}')           
 
-            response = s3.upload_fileobj(file, app.config['AUDIO_BUCKET'], file.filename)
-            response = jsonify({'message': response})
+            response = s3.upload_fileobj(file, application.config['AUDIO_BUCKET'], file.filename)
+            response = jsonify({'message': "Upload successfull.."})
             response.status_code = 200
 
         except Exception as e:
             # Incase of any errors handle them
             response = jsonify({'message': str(e)})
-            print(f'Bucket selected {app.config["AUDIO_BUCKET"]}')
+            print(f'Bucket selected {application.config["AUDIO_BUCKET"]}')
             response.status_code = 500
         
         # Finally respond to client with response 
@@ -62,4 +73,4 @@ def upload_file():
         return resp
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    application.run(debug=True)

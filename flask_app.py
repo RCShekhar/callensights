@@ -5,7 +5,7 @@ APP_NAME='Callensights.com'
 app = Flask(APP_NAME.split('.')[0])
 app.config.from_prefixed_env('CANS')
 app.secret_key = "secret key"
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 3 * 1024 * 1024 * 1024
 app.config['AUDIO_BUCKET']='callensights-audio'
 app.config['FEEDBACK_BUCKET']='callensights-transcript'
 
