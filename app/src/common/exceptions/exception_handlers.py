@@ -1,0 +1,42 @@
+from http import HTTPStatus
+
+from fastapi import HTTPException, Request
+from fastapi.exceptions import RequestValidationError
+from starlette.responses import JSONResponse
+
+from app.src.common.exceptions.application_exception import BaseAppException
+
+
+def log_exception(exc: BaseAppException, request: Request) -> None:
+    pass
+
+
+async def app_exception_handler(request: Request, exc: BaseAppException) -> JSONResponse:
+    log_exception(exc, request)
+
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "custom_error_code": exc.custom_error_code,
+            "error_description": exc.description,
+            "error_message": exc.data.get("error_message", "")
+        },
+    )
+
+
+async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
+    log_exception(exc, request)
+
+    return JSONResponse(
+        status_code=HTTPStatus.BAD_REQUEST,
+        content={'detail': exc.errors(), 'body': exc.body}
+    )
+
+
+async def general_exception_handler(request: Request, exc: BaseException) -> JSONResponse:
+    log_exception(exc, request)
+
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "An Unknown error occurred."}
+    )
