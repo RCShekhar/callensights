@@ -7,8 +7,8 @@ from app.src.core.schemas.responses.upload_response import UploadMediaResponseMo
 from app.src.core.schemas.requests.upload_request import UploadMediaInputsModel
 from app.src.core.services.upload_service import UploadMediaService
 
-
 media_router = APIRouter(tags=["Callensights - Media"])
+
 
 @media_router.post(
     "/upload",
@@ -17,17 +17,14 @@ media_router = APIRouter(tags=["Callensights - Media"])
     response_model_by_alias=False
 )
 async def upload_media(
-        files: List[UploadFile] = File(...),
-        inputs: UploadMediaInputsModel = Body(...),
+        inputs: UploadMediaInputsModel,
         upload_service: UploadMediaService = Depends()
 ):
+    data = inputs.model_dump()
     response = []
-    for file in files:
+    for file in data.get('files', []):
         response.append(
             upload_service.register_media(file, inputs)
         )
 
     return JSONResponse(content=response)
-
-
-

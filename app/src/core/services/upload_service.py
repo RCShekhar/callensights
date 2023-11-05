@@ -17,11 +17,11 @@ class UploadMediaService:
         self.repository = upload_repository
         self.settings = settings
 
-    def register_media(self, file: UploadFile, input: UploadMediaInputsModel) -> Dict[str, Any]:
+    def register_media(self, file: str, input: UploadMediaInputsModel) -> Dict[str, Any]:
         response = {}
 
         inputs = input.model_dump()
-        inputs['file_name'] = file.filename
+        inputs['file_name'] = file
         validated_inputs = self._validate_inputs(inputs)
         stored_media_file = self.repository.register_media(validated_inputs)
 
@@ -48,7 +48,6 @@ class UploadMediaService:
             response['message'] = str(e)
 
         return response
-
 
     def _validate_inputs(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
         return inputs

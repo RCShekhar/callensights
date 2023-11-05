@@ -12,3 +12,11 @@ PROC_PARAMS = [
     'product',
     'user_id'
 ]
+
+ALLOWED_TYPES = [
+    "mp3",
+    "m4a",
+    "wav",
+    "mp4",
+    "avi"
+]

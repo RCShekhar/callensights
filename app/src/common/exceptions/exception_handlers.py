@@ -7,7 +7,7 @@ from starlette.responses import JSONResponse
 from app.src.common.exceptions.application_exception import BaseAppException
 
 
-def log_exception(exc: BaseAppException, request: Request) -> None:
+def log_exception(exc: BaseException, request: Request) -> None:
     pass
 
 
@@ -29,7 +29,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
     return JSONResponse(
         status_code=HTTPStatus.BAD_REQUEST,
-        content={'detail': exc.errors(), 'body': exc.body}
+        content={'message': "FAILED", 'detail':  exc.errors()}
     )
 
 
@@ -38,5 +38,5 @@ async def general_exception_handler(request: Request, exc: BaseException) -> JSO
 
     return JSONResponse(
         status_code=500,
-        content={"detail": "An Unknown error occurred."}
+        content={"message": "FAILED", "detail": "An Unknown error occurred."}
     )

@@ -1,4 +1,6 @@
 from datetime import datetime
+
+import uvicorn
 from fastapi import FastAPI
 from fastapi import HTTPException
 from fastapi.exception_handlers import http_exception_handler
@@ -39,3 +41,7 @@ def startup() -> None:
 @application.on_event("shutdown")
 def shutdown() -> None:
     pass
+
+
+if __name__ == "__main__":
+    uvicorn.run(application, host="0.0.0.0", port=8081)
