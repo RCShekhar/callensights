@@ -6,6 +6,7 @@ import boto3 as aws
 from app.src.core.repositories.upload_repository import UploadMediaRepository
 from app.src.core.schemas.requests.upload_request import UploadMediaInputsModel
 from app.src.common.config.app_settings import get_app_settings, Settings
+from app.src.core.schemas.responses.upload_response import MediaResponse
 
 
 class UploadMediaService:
@@ -17,7 +18,7 @@ class UploadMediaService:
         self.repository = upload_repository
         self.settings = settings
 
-    def register_media(self, file: str, input: UploadMediaInputsModel) -> Dict[str, Any]:
+    def register_media(self, file: str, input: UploadMediaInputsModel) -> MediaResponse:
         response = {}
 
         inputs = input.model_dump()
@@ -47,7 +48,10 @@ class UploadMediaService:
             response['presigned_url'] = None
             response['message'] = str(e)
 
-        return response
+        # validate media response
+        media_response = MediaResponse.model_validate(**response)
+
+        return media_response
 
     def _validate_inputs(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
         return inputs
