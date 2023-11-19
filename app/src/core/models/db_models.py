@@ -29,12 +29,12 @@ class User(Base):
     middle_name: Mapped[str] = mapped_column('cu_middle_name')
     last_name: Mapped[str] = mapped_column('cu_last_name')
     email: Mapped[str] = mapped_column('cu_email')
-    ph_no: Mapped[str] = mapped_column('cu_phone')
-    org: Mapped[str] = mapped_column('cu_organization')
+    phone: Mapped[str] = mapped_column('cu_ph')
+    organization: Mapped[str] = mapped_column('cu_organization')
     role: Mapped[str] = mapped_column('cu_role')
     created_dt: Mapped[datetime] = mapped_column('cu_created_dt', default=datetime.now())
     updated_dt: Mapped[datetime] = mapped_column('cu_updated_dt')
-    user_group: Mapped[int] = mapped_column('cu_user_group_id', ForeignKey('UserGroup.id'), nullable=False)
+    user_group: Mapped[int] = mapped_column('cu_user_group_id', ForeignKey('cns_user_group.ug_group_id'), nullable=False)
 
     # TODO - implement relationship between user and usergroup
     # user_group: Mapped[List["UserGroup"]] = relationship("UserGroup", back_populates="User")

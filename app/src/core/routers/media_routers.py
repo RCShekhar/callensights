@@ -11,7 +11,7 @@ from app.src.core.schemas.requests import GetUploadsRequestModel
 from app.src.core.schemas.responses import GetUploadsResponseModel
 from app.src.core.services import GetUPloadsService
 
-media_router = APIRouter(tags=["Callensights - Media"])
+media_router = APIRouter(tags=["Media"])
 
 
 @media_router.post(
@@ -36,7 +36,7 @@ async def upload_media(
     return JSONResponse(content=upload_response.model_dump())
 
 
-@media_router.post(
+@media_router.get(
     "/get-uploads",
     summary="",
     response_model=GetUploadsResponseModel,

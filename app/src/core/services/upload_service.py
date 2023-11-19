@@ -1,9 +1,9 @@
-from typing import Dict, Any, List
+from typing import Dict, Any
 
-from fastapi import Depends, UploadFile
+from fastapi import Depends
 import boto3 as aws
 
-from app.src.core.repositories.upload_repository import UploadMediaRepository
+from app.src.core.repositories.media_repositories.upload_media_repository import UploadMediaRepository
 from app.src.core.schemas.requests.upload_request import UploadMediaInputsModel
 from app.src.common.config.app_settings import get_app_settings, Settings
 from app.src.core.schemas.responses.upload_response import MediaResponse
@@ -23,8 +23,7 @@ class UploadMediaService:
 
         inputs = input.model_dump()
         inputs['file_name'] = file
-        validated_inputs = self._validate_inputs(inputs)
-        stored_media_file = self.repository.register_media(validated_inputs)
+        stored_media_file = self.repository.register_media(inputs)
 
         try:
             s3 = aws.client('s3')
@@ -52,6 +51,3 @@ class UploadMediaService:
         media_response = MediaResponse.model_validate(**response)
 
         return media_response
-
-    def _validate_inputs(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
-        return inputs

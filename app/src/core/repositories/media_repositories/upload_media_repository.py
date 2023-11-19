@@ -4,14 +4,14 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from fastapi import Depends
 
-from app.src.common.config.database import get_db_engine
+from app.src.common.config.database import get_db_session
 from app.src.common.constants.global_constants import PROC_PARAMS
 
 
 class UploadMediaRepository:
     def __init__(
             self,
-            db_session: Session = Depends(get_db_engine)
+            db_session: Session = Depends(get_db_session)
     ):
         self.db_session = db_session
 

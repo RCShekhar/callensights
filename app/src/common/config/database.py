@@ -2,6 +2,7 @@ from functools import lru_cache
 
 from sqlalchemy import create_engine, URL
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import DatabaseError
 
 from app.src.common.config.app_settings import get_app_settings
 from app.src.common.config.secret_manager import get_secret
@@ -27,9 +28,13 @@ class Database:
 
 
 @lru_cache()
-def get_db_engine():
+def get_db_session():
     db = Database()
     session = db.Session()
-    return session
+
+    try:
+        return session
+    except DatabaseError:
+        session.close()
 
 

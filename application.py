@@ -13,9 +13,12 @@ from app.src.common.exceptions.exception_handlers import (
     validation_exception_handler
 )
 from app.src.core.routers.media_routers import media_router
+from app.src.core.routers.users_routers import user_router
+
 application = FastAPI(
     docs_url="/callensights/docs",
-    openapi_url="/callensights/openapi"
+    openapi_url="/callensights/openapi",
+    title="Callensights"
 )
 
 application.add_exception_handler(BaseAppException, app_exception_handler)
@@ -23,12 +26,13 @@ application.add_exception_handler(HTTPException, http_exception_handler)
 application.add_exception_handler(RequestValidationError, validation_exception_handler)
 application.add_exception_handler(Exception, general_exception_handler)
 
-
 # application.add_exception_handler()
 
 application.include_router(media_router, prefix="/media")
+application.include_router(user_router, prefix="/user")
 
-@application.get("/", tags=["Callensights"])
+
+@application.get("/", tags=["Home"])
 async def home():
     return {"time": datetime.now().strftime("%d/%m/%Y, %H:%M:%S")}
 
