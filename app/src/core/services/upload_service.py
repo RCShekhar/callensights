@@ -1,9 +1,9 @@
-from typing import Dict, Any
+from typing import Optional
 
 from fastapi import Depends
 import boto3 as aws
 
-from app.src.core.repositories.media_repositories.upload_media_repository import UploadMediaRepository
+from app.src.core.repositories.upload_media_repository import UploadMediaRepository
 from app.src.core.schemas.requests.upload_request import UploadMediaInputsModel
 from app.src.common.config.app_settings import get_app_settings, Settings
 from app.src.core.schemas.responses.upload_response import MediaResponse
@@ -18,10 +18,10 @@ class UploadMediaService:
         self.repository = upload_repository
         self.settings = settings
 
-    def register_media(self, file: str, input: UploadMediaInputsModel) -> MediaResponse:
+    def register_media(self, file: str, media_input: UploadMediaInputsModel) -> Optional[MediaResponse]:
         response = {}
 
-        inputs = input.model_dump()
+        inputs = media_input.model_dump()
         inputs['file_name'] = file
         stored_media_file = self.repository.register_media(inputs)
 
@@ -42,6 +42,7 @@ class UploadMediaService:
             response['audio_code'] = stored_media_file.split('.')[0]
             response['presigned_url'] = s3_url_response
             response['message'] = "URL Generated"
+
         except Exception as e:
             response['audio_code'] = None
             response['presigned_url'] = None

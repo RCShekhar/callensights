@@ -132,13 +132,13 @@ class Lead(Base):
     id: Mapped[int] = mapped_column('cl_lead_id', primary_key=True)
     name: Mapped[str] = mapped_column('cl_lead_name')
     email: Mapped[str] = mapped_column('cl_email')
-    ph_no: Mapped[str] = mapped_column('cl_phone', unique=True)
+    phone: Mapped[str] = mapped_column('cl_phone', unique=True)
     country: Mapped[str] = mapped_column('cl_country')
     st_province: Mapped[str] = mapped_column('cl_state_province')
 
     created_dt: Mapped[datetime] = mapped_column('cl_created_dt', default=datetime.now())
     updated_dt: Mapped[datetime] = mapped_column('cl_updated_dt')
-    code: Mapped[str] = mapped_column('cl_type_code', nullable=False)
+    lead_type_code: Mapped[str] = mapped_column('cl_type_code', nullable=False)
 
 
 class LeadTypes(Base):

@@ -20,7 +20,6 @@ class UserRepository:
     # @handle_db_exception
     def add_user(self, user_model: CreateUserRequest) -> User:
         dump = user_model.model_dump()
-        print(dump)
         user = User(**dump)
         self.db.add(user)
         self.db.commit()

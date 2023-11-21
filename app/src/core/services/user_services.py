@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from app.src.core.services.base_service import BaseService
 from app.src.common.config.app_settings import get_app_settings, Settings
-from app.src.core.repositories.user_repositories.create_user_repository import UserRepository
+from app.src.core.repositories.create_user_repository import UserRepository
 from app.src.core.schemas.responses.create_user_response import CreateUserResponse
 from app.src.core.schemas.responses.create_user_group_response import CreateUserGroupResponse
 
@@ -16,7 +16,7 @@ class UserService(BaseService):
             repository: UserRepository = Depends(),
             settings: Settings = Depends(get_app_settings)
     ) -> None:
-        super().__init__("CreateUser")
+        super().__init__("UserService")
         self.repository = repository
         self.settings = settings
 

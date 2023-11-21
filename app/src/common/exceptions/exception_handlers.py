@@ -17,7 +17,7 @@ async def app_exception_handler(request: Request, exc: BaseAppException) -> JSON
     return JSONResponse(
         status_code=exc.status_code,
         content={
-            "custom_error_code": exc.custom_error_code,
+            "custom_error_code": int(exc.custom_error_code),
             "error_description": exc.description,
             "error_message": exc.data.get("error_message", "")
         },

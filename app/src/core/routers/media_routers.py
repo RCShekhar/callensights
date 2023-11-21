@@ -1,6 +1,6 @@
 from typing import List, Any
 
-from fastapi import APIRouter, Depends, UploadFile, File, Body
+from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 
 from app.src.core.schemas.responses.upload_response import UploadMediaResponseModel
