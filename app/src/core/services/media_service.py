@@ -1,4 +1,5 @@
 from typing import Optional
+from uuid import uuid4
 
 from fastapi import Depends
 import boto3 as aws
@@ -23,7 +24,14 @@ class MediaService:
 
         inputs = media_input.model_dump()
         inputs['file_name'] = file
-        stored_media_file = self.repository.register_media(inputs)
+        file_type = file.split('.')[-1]
+        media_code = self._get_new_correlation_id()
+        new_media_name = media_code + '.' + file_type
+        inputs['media_code'] = media_code
+        inputs['new_media_name'] = new_media_name
+        del inputs['files']
+
+        self.repository.register_media(inputs)
 
         try:
             s3 = aws.client('s3')
@@ -52,3 +60,6 @@ class MediaService:
         media_response = MediaResponse.model_validate(**response)
 
         return media_response
+
+    def _get_new_correlation_id(self) -> str:
+        return str(uuid4())

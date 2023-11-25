@@ -6,6 +6,7 @@ from fastapi import Depends
 
 from app.src.common.config.database import get_db_session
 from app.src.common.constants.global_constants import PROC_PARAMS
+from app.src.core.models.db_models import Media
 
 
 class UploadMediaRepository:
@@ -19,6 +20,8 @@ class UploadMediaRepository:
     def register_media(self, params: Dict[str, Any]) -> str:
         proc_params = ', '.join([':' + param for param in PROC_PARAMS])
         proc_inputs = {param: params.get(param) for param in PROC_PARAMS}
+
+        media = Media()
 
         self.db_session.execute(
             text(f"CALL proc_insert_upload({proc_params}, @new_file)"),

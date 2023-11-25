@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -29,3 +29,4 @@ class UploadMediaInputsModel(BaseModel):
                 raise ValueError(f"Invalid Media file")
 
         return value
+

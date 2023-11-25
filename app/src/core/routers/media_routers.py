@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 
 from app.src.core.schemas.responses.upload_response import UploadMediaResponseModel
 from app.src.core.schemas.requests.upload_request import UploadMediaInputsModel
-from app.src.core.services.upload_service import UploadMediaService
+from app.src.core.services.media_service import MediaService
 
 from app.src.core.schemas.requests import GetUploadsRequestModel
 from app.src.core.schemas.responses import GetUploadsResponseModel
@@ -22,7 +22,7 @@ media_router = APIRouter(tags=["Media"])
 )
 async def upload_media(
         inputs: UploadMediaInputsModel,
-        upload_service: UploadMediaService = Depends()
+        upload_service: MediaService = Depends()
 ):
     data = inputs.model_dump()
     response = []
