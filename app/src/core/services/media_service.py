@@ -9,7 +9,7 @@ from app.src.common.config.app_settings import get_app_settings, Settings
 from app.src.core.schemas.responses.upload_response import MediaResponse
 
 
-class UploadMediaService:
+class MediaService:
     def __init__(
             self,
             upload_repository: UploadMediaRepository = Depends(),
