@@ -6,7 +6,7 @@ from app.src.common.constants.global_constants import ALLOWED_TYPES
 
 
 class UploadMediaInputsModel(BaseModel):
-    user_id: str = Field(..., validation_alias="USER_ID")
+    user_id: int = Field(..., validation_alias="USER_ID")
     rep_name: Optional[str] = Field(..., validation_alias="REP_NAME")
     lead_name: Optional[str] = Field(..., validation_alias="LEAD_NAME")
     lead_id: int = Field(..., validation_alias="LEAD_ID")

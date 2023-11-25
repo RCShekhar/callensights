@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from fastapi import Depends
 from sqlalchemy import create_engine, URL
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import DatabaseError
@@ -10,7 +11,7 @@ from app.src.common.config.secret_manager import get_secret
 
 class Database:
     def __init__(self):
-        self. db_url = self.get_db_url()
+        self.db_url = self.get_db_url()
         self.engine = create_engine(self.db_url)
         self.Session = sessionmaker(self.engine)
 
@@ -27,14 +28,11 @@ class Database:
         return url
 
 
-@lru_cache()
 def get_db_session():
     db = Database()
     session = db.Session()
 
     try:
         return session
-    except DatabaseError:
+    finally:
         session.close()
-
-

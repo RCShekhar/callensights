@@ -5,11 +5,10 @@ from pydantic import AnyHttpUrl
 
 
 class MediaResponse(BaseModel):
-    file: Optional[str] = Field(..., validation_alias="MEDIA_FILE")
-    audio_code: Optional[str] = Field(..., validation_alias="AUDIO_CODE")
-    presigned_url: Dict[str, Any] = Field(..., validation_alias="PRESIGNED_URL")
-    message: Optional[str] = Field(..., validation_alias="MESSAGE")
+    file: Optional[str]
+    media_code: Optional[str]
+    presigned_url: Optional[Dict[str, Any]]
+    message: Optional[str]
 
 
-class UploadMediaResponseModel(BaseModel):
-    response: List[Optional[MediaResponse]] = []
+

@@ -1,28 +1,25 @@
-from typing import Generic, Dict, Any, Optional, TypeVar
+from typing import Dict, Any, Type
 
 from fastapi import Depends
 from sqlalchemy.orm import Session
-from sqlalchemy import insert
 
-from app.src.common.config.database import Database, get_db_session
+from app.src.common.config.database import get_db_session
 from app.src.core.models.db_models import Base
+from app.src.common.decorators.db_exception_handlers import handle_db_exception
 
-GenericModel = TypeVar("GenericModel")
 
-
-class GenericDBRepository(Generic[GenericModel]):
+class GenericDBRepository:
     def __init__(
             self,
-            model: Generic[Base],
-            session: Session = Depends(get_db_session)
+            model: Type[Base],
+            # session: Session = Depends(get_db_session)
     ):
-        self.session: Session = session
+        self.session: Session = get_db_session()
         self.model: Base = model
 
-    def insert(self, record: Dict[str, Any]) -> GenericModel:
+    @handle_db_exception
+    def insert(self, record: Dict[str, Any]) -> Base:
         model_record = self.model(**record)
         self.session.add(model_record)
         self.session.commit()
         return model_record
-
-
