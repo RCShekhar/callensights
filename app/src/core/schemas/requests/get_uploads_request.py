@@ -1,5 +1,5 @@
-
 from pydantic import BaseModel
 
+
 class GetUploadsRequestModel(BaseModel):
-    pass
+    user_id: int

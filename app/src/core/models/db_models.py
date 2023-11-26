@@ -34,7 +34,8 @@ class User(Base):
     role: Mapped[str] = mapped_column('cu_role')
     created_dt: Mapped[datetime] = mapped_column('cu_created_dt', default=datetime.now())
     updated_dt: Mapped[datetime] = mapped_column('cu_updated_dt')
-    user_group: Mapped[int] = mapped_column('cu_user_group_id', ForeignKey('cns_user_group.ug_group_id'), nullable=False)
+    user_group: Mapped[int] = mapped_column('cu_user_group_id', ForeignKey('cns_user_group.ug_group_id'),
+                                            nullable=False)
 
     # TODO - implement relationship between user and usergroup
     # user_group: Mapped[List["UserGroup"]] = relationship("UserGroup", back_populates="User")
@@ -46,15 +47,15 @@ class Media(Base):
     id: Mapped[int] = mapped_column('cm_media_id', primary_key=True)
     media_code: Mapped[str] = mapped_column('cm_media_code', unique=True)
     # user_id: Mapped[int] = mapped_column() # Put reference here
-    user_id: Mapped[int] = mapped_column('cm_user_id', ForeignKey('User.id'), nullable=False)
+    user_id: Mapped[int] = mapped_column('cm_user_id', ForeignKey('cns_user_def.cu_user_id'), nullable=False)
     original_name: Mapped[str] = mapped_column('cm_original_name')
     file_type: Mapped[str] = mapped_column('cm_file_type')
     stored_file: Mapped[str] = mapped_column('cm_store_file')
     media_len: Mapped[int] = mapped_column('cm_media_length')
     media_size: Mapped[int] = mapped_column('cm_media_size')
     bucket: Mapped[str] = mapped_column('cm_bucket')
-    event_date: Mapped[datetime] = mapped_column('cm_event_date')
-    rep_name: Mapped[str] = mapped_column('cm_rep_nmae')
+    event_date: Mapped[datetime] = mapped_column('cm_event_dt')
+    rep_name: Mapped[str] = mapped_column('cm_rep_name')
     # lead_name: Mapped[str] = mapped_column('cm_lead_name')
     # lead_type: Mapped[str] = mapped_column('cm_lead_type')
     conv_type: Mapped[str] = mapped_column('cm_conv_type')
@@ -69,7 +70,7 @@ class MediaStatus(Base):
 
     id: Mapped[int] = mapped_column('ms_status_id', primary_key=True, autoincrement="auto")
     # media_id # Put reference here
-    media_id: Mapped[int] = mapped_column('ms_media_id', ForeignKey('Media.id'), nullable=False)
+    media_id: Mapped[int] = mapped_column('ms_media_id', ForeignKey('cns_media_def.cm_media_id'), nullable=False)
     trans_status_cd: Mapped[str] = mapped_column('ms_trans_status_cd', default='N')
     trans_start_dt: Mapped[datetime] = mapped_column('ms_trans_start_dt')
     trans_end_dt: Mapped[datetime] = mapped_column('ms_trans_end_dt')

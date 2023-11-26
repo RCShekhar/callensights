@@ -62,6 +62,8 @@ class MediaService:
                     data={'user_id': request_dump.get('user_id'), 'traceback': format_exc()}
                 )
 
+            self.media_repository.register_media(request_dump)
+
             file_response['file'] = file
             file_response['media_code'] = media_code
             try:
@@ -100,16 +102,9 @@ class MediaService:
             )
 
         records = self.media_repository.get_uploads(user_id)
-        response = []
-        for record in records:
-            data = {
-                'media_code': record.media_code,
-                'media_type': record.file_type,
-                'media_size': record.media_size,
-                'media_length': record.media_len,
-                'lead_name': record.lead_name,
-                'conv_type': record.conv_type
-            }
+
+        response = [GetUploadsResponseModel.model_validate(record._asdict()) for record in records]
+        return response
 
     def _get_new_correlation_id(self) -> str:
         return str(uuid4())

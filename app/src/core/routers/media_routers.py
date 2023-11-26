@@ -23,7 +23,6 @@ async def upload_media(
         inputs: UploadMediaInputsModel,
         upload_service: MediaService = Depends()
 ):
-
     response = upload_service.register_media(inputs)
 
     return JSONResponse(content=[model.model_dump() for model in response])
@@ -36,8 +35,8 @@ async def upload_media(
     response_model_by_alias=False
 )
 async def get_uploads(
-        get_uploads_inputs: GetUploadsRequestModel,
+        user_id: int,
         service: MediaService = Depends()
 ):
-    response = service.get_uploads(get_uploads_inputs)
-    return JSONResponse(content=[model.model_dump() for model in response])
+    response = service.get_uploads(user_id)
+    return JSONResponse(content={'records': [model.model_dump() for model in response]})
