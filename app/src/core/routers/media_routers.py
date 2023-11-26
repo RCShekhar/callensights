@@ -1,13 +1,12 @@
-from typing import List, Any
+from typing import List
 
 from fastapi import APIRouter, Depends
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 
 from app.src.core.schemas.responses.upload_response import MediaResponse
 from app.src.core.schemas.requests.upload_request import UploadMediaInputsModel
 from app.src.core.services.media_service import MediaService
 
-from app.src.core.schemas.requests import GetUploadsRequestModel
 from app.src.core.schemas.responses import GetUploadsResponseModel
 
 media_router = APIRouter(tags=["Media"])
@@ -40,3 +39,16 @@ async def get_uploads(
 ):
     response = service.get_uploads(user_id)
     return JSONResponse(content={'records': [model.model_dump() for model in response]})
+
+
+@media_router.get(
+    "/get-media",
+    summary="Stream media bytes",
+    # response_model=StreamingResponse,
+    response_model_by_alias=False
+)
+async def get_media(
+        media_code: str,
+        media_service: MediaService = Depends()
+) -> StreamingResponse:
+    return media_service.get_media_stream(media_code)

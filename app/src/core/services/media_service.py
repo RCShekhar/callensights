@@ -5,6 +5,7 @@ from uuid import uuid4
 from traceback import format_exc
 
 from fastapi import Depends
+from fastapi.responses import StreamingResponse
 import boto3 as aws
 
 from app.src.common.exceptions.application_exception import BaseAppException
@@ -16,7 +17,7 @@ from app.src.core.schemas.requests.upload_request import UploadMediaInputsModel
 from app.src.common.config.app_settings import get_app_settings, Settings
 from app.src.core.schemas.responses.upload_response import MediaResponse
 from app.src.core.schemas.responses.get_uploads_response import GetUploadsResponseModel
-
+from app.src.core.repositories.aws_repositories import S3Repository
 
 class MediaService:
     def __init__(
@@ -28,6 +29,7 @@ class MediaService:
         self.settings = settings
         self.lead_repository = LeadRepository()
         self.user_repository = UserRepository()
+        self.s3_repository = S3Repository()
 
     def register_media(self, media_input: UploadMediaInputsModel) -> Optional[List[MediaResponse]]:
         response = []
@@ -105,6 +107,15 @@ class MediaService:
 
         response = [GetUploadsResponseModel.model_validate(record._asdict()) for record in records]
         return response
+
+    def get_media_stream(self, media_code: str) -> StreamingResponse:
+        key, media_content = self.s3_repository.get_media_stream(media_code)
+        if media_content is not None:
+            return StreamingResponse(
+                iter([media_content]),
+                media_type="application/octet-stream",
+                headers={"Content-Disposition": f"attachment; filename={key}"}
+            )
 
     def _get_new_correlation_id(self) -> str:
         return str(uuid4())

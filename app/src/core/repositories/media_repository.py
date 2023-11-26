@@ -1,4 +1,4 @@
-from typing import Dict, Any, List, Type
+from typing import Dict, Any, List, Optional
 
 from sqlalchemy import Row
 from app.src.common.decorators.db_exception_handlers import handle_db_exception
@@ -22,6 +22,7 @@ class MediaRepository(GenericDBRepository):
 
         return response
 
+    @handle_db_exception
     def get_uploads(self, user_id: int) -> List[Row]:
         records = (self.session.query(
             Media.media_code.label("media_code"),
@@ -36,3 +37,14 @@ class MediaRepository(GenericDBRepository):
         ).filter(Media.user_id == user_id).all())
 
         return records
+
+    @handle_db_exception
+    def get_media_name(self, media_code) -> Optional[str]:
+        rows = (self.session.query(
+            Media.stored_file
+        ).filter(Media.media_code == media_code).all())
+
+        if not rows:
+            return None
+
+        return rows[0][0]

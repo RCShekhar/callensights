@@ -25,7 +25,7 @@ async def create_lead(
 
 
 @lead_router.post(
-    "create-lead-type",
+    "/create-lead-type",
     summary="Define a new type of lead",
     response_model=CreateLeadTypeResponseModel,
     response_model_by_alias=False
