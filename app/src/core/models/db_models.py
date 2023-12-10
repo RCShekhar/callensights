@@ -34,6 +34,7 @@ class User(Base):
     role: Mapped[str] = mapped_column('cu_role')
     created_dt: Mapped[datetime] = mapped_column('cu_created_dt', default=datetime.now())
     updated_dt: Mapped[datetime] = mapped_column('cu_updated_dt')
+    image_url: Mapped[str] = mapped_column("cu_image_url")
     user_group: Mapped[int] = mapped_column(
         'cu_user_group_id',
         ForeignKey('cns_user_group.ug_group_id'),
@@ -44,9 +45,6 @@ class User(Base):
         ForeignKey("cns_user_def.cu_user_id"),
         nullable=True
     )
-
-    # TODO - implement relationship between user and usergroup
-    # user_group: Mapped[List["UserGroup"]] = relationship("UserGroup", back_populates="User")
 
 
 class Media(Base):

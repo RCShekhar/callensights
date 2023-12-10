@@ -3,12 +3,12 @@ from typing import Any
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 
+from app.src.core.services.user_services import UserService
 from app.src.core.schemas.requests.create_user_request import CreateUserRequest
 from app.src.core.schemas.responses.create_user_response import CreateUserResponse
-from app.src.core.services.user_services import UserService
-
 from app.src.core.schemas.requests.create_user_group_request import CreateUserGroupRequest
 from app.src.core.schemas.responses.create_user_group_response import CreateUserGroupResponse
+from app.src.core.schemas.requests.update_user_request import UpdateUserRequest
 
 user_router = APIRouter(tags=["Users"])
 
@@ -26,6 +26,7 @@ def create_user(
     response = service.create_user(inputs)
     return JSONResponse(content=response)
 
+
 @user_router.post(
     "/create-user-group",
     summary="Create a new user_group",
@@ -38,3 +39,29 @@ def create_user_group(
 ) -> JSONResponse:
     response = service.create_user_group(inputs)
     return JSONResponse(content=response)
+
+@user_router.patch(
+    "/update-user",
+    summary="Update user details",
+    response_model_by_alias=False
+)
+def update_user(
+        user_id: str,
+        user_data: UpdateUserRequest,
+        service: UserService = Depends()
+):
+    response = service.update_user(user_id, user_data)
+    return JSONResponse(content={"status": response})
+
+
+@user_router.delete(
+    "/user-delete",
+    summary="Delete an existing user",
+    response_model_by_alias=False
+)
+def delete_user(
+        user_id: str,
+        service: UserService = Depends()
+):
+    response = service.delete_user(user_id)
+    return JSONResponse(content={"status": response})

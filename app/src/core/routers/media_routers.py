@@ -39,18 +39,20 @@ async def get_uploads(
     response = service.get_uploads(user_id)
     return JSONResponse(content={'records': [model.model_dump() for model in response]})
 
+
 @media_router.get(
     "/get-all-uploads",
     summary="Get list of all media uploaded by self and team",
-    response_model= List[GetUploadsResponseModel],
+    response_model=List[GetUploadsResponseModel],
     response_model_by_alias=False
 )
 async def get_all_uploads(
-        user_id:str,
+        user_id: str,
         service: MediaService = Depends()
 ):
     response = service.get_all_uploads(user_id)
     return JSONResponse(content={'records': [model.model_dump() for model in response]})
+
 
 @media_router.get(
     "/get-media",
@@ -87,4 +89,3 @@ async def get_transcript(
         media_service: MediaService = Depends()
 ):
     return media_service.get_transcription(media_code)
-

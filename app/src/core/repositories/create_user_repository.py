@@ -1,6 +1,7 @@
-from typing import List, Any
+import select
+from typing import List, Any, Dict
 
-from sqlalchemy import select
+from sqlalchemy import select, update, delete
 
 from app.src.core.repositories.geniric_repository import GenericDBRepository
 from app.src.core.models.db_models import User, UserGroup
@@ -47,3 +48,13 @@ class UserRepository(GenericDBRepository):
         )
         result = self.session.execute(select([cte]))
         return [usr_id for usr_id, in result.all()]
+
+    def update_user(self, user_id: str, user_data: Dict[str, Any]) -> None:
+        cte = update(User).where(User.clerk_id == user_id).values(user_data)
+        self.session.execute(cte)
+        self.session.commit()
+
+    def delete_user(self, user_id: str) -> None:
+        cte = delete(User).where(User.clerk_id == user_id)
+        self.session.execute(cte)
+        self.session.commit()

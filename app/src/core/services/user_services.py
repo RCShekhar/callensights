@@ -3,11 +3,13 @@ from typing import Optional, Any, Dict
 from fastapi import Depends
 from pydantic import BaseModel
 
+from app.src.common.exceptions.application_exception import BaseAppException
 from app.src.core.services.base_service import BaseService
 from app.src.common.config.app_settings import get_app_settings, Settings
 from app.src.core.repositories.create_user_repository import UserRepository
 from app.src.core.schemas.responses.create_user_response import CreateUserResponse
 from app.src.core.schemas.responses.create_user_group_response import CreateUserGroupResponse
+from app.src.core.schemas.requests.update_user_request import UpdateUserRequest
 
 
 class UserService(BaseService):
@@ -36,3 +38,31 @@ class UserService(BaseService):
                 'group_name': user_group.group_name
             }
         ).model_dump()
+
+    def update_user(self, user_id: str, user_details: UpdateUserRequest) -> str:
+        status = "FAILED"
+        if not self.repository.is_user_exists(user_id):
+            raise BaseAppException(
+                status_code=404,
+                description="No Such User found",
+                data={"user_id": user_id}
+            )
+
+        self.repository.update_user(user_id, user_details.model_dump())
+        status = "SUCCESS"
+
+        return status
+
+
+    def delete_user(self, user_id:str) -> str:
+        status = "FAILED"
+        if not self.repository.is_user_exists(user_id):
+            raise BaseAppException(
+                status_code=404,
+                description="No Such User found",
+                data={"user_id": user_id}
+            )
+
+        self.repository.delete_user(user_id)
+        satus = "SUCCESS"
+        return status
