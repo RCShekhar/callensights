@@ -6,6 +6,7 @@ from app.src.core.schemas.requests.create_lead_request import CreateLeadRequestM
 from app.src.core.schemas.responses.create_lead_response import CreateLeadResponseModel
 from app.src.core.schemas.responses.create_lead_type_response import CreateLeadTypeResponseModel
 from app.src.core.schemas.requests.create_lead_type_request import CreateLeadTypeRequestModel
+from app.src.core.schemas.responses.lead_info_response import LeadInfoResponse
 
 lead_router = APIRouter(tags=['Lead'])
 
@@ -38,14 +39,16 @@ def create_lead_type(
     return JSONResponse(content=response)
 
 
-# @lead_router.get(
-#     "/get-leads",
-#     summary="Get list of leads assigned to a rep or unassigned",
-#     response_model=GetLeadsResponseModel,
-#     response_model_by_alias=False
-# )
-# def get_leads(
-#         user_id: str,
-#         lead_service: LeadService = Depends()
-# ) -> JSONResponse:
-#     pass
+@lead_router.get(
+    "/info",
+    summary="Get list of leads assigned to a rep or unassigned",
+    response_model=LeadInfoResponse,
+    response_model_by_alias=False
+)
+def lead_info(
+        lead_id: int,
+        user_id: str,
+        lead_service: LeadService = Depends()
+) -> JSONResponse:
+    response= lead_service.get_lead_info(lead_id, user_id)
+    return JSONResponse(content=response)

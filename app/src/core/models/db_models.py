@@ -113,12 +113,13 @@ class GroupMessages(Base):
     end_dt: Mapped[datetime] = mapped_column('gm_end_dt')
 
 
-class CallTypes(Base):
+class LeadStages(Base):
     __tablename__ = "cns_lead_stage_def"
 
     id: Mapped[int] = mapped_column('ls_stage_id', primary_key=True)
     code: Mapped[str] = mapped_column('ls_stage_code')
     description: Mapped[str] = mapped_column('ls_stage_desc')
+    is_active: Mapped[bool] = mapped_column('ls_is_active')
     created_dt: Mapped[datetime] = mapped_column('ls_created_dt', default=datetime.now())
     modified_dt: Mapped[datetime] = mapped_column('ls_modified_dt')
 
@@ -144,7 +145,9 @@ class Lead(Base):
     phone: Mapped[str] = mapped_column('cl_phone', unique=True)
     country: Mapped[str] = mapped_column('cl_country')
     st_province: Mapped[str] = mapped_column('cl_state_province')
-
+    stage_id: Mapped[int] = mapped_column("cl_stage_id", ForeignKey('LeadStages.id'), nullable=True)
+    assigned_to: Mapped[int] = mapped_column("cl_assigned_to", ForeignKey('User.id'), nullable=True)
+    lead_desc: Mapped[str] = mapped_column("cl_lead_desc")
     created_dt: Mapped[datetime] = mapped_column('cl_created_dt', default=datetime.now())
     updated_dt: Mapped[datetime] = mapped_column('cl_updated_dt')
     lead_type_code: Mapped[str] = mapped_column('cl_type_code', nullable=False)

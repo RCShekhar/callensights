@@ -9,6 +9,7 @@ from app.src.core.schemas.responses.create_user_response import CreateUserRespon
 from app.src.core.schemas.requests.create_user_group_request import CreateUserGroupRequest
 from app.src.core.schemas.responses.create_user_group_response import CreateUserGroupResponse
 from app.src.core.schemas.requests.update_user_request import UpdateUserRequest
+from app.src.core.schemas.responses.user_workspace_response import UserWorkspaceResponse
 
 user_router = APIRouter(tags=["Users"])
 
@@ -40,6 +41,7 @@ def create_user_group(
     response = service.create_user_group(inputs)
     return JSONResponse(content=response)
 
+
 @user_router.patch(
     "/update-user",
     summary="Update user details",
@@ -49,7 +51,7 @@ def update_user(
         user_id: str,
         user_data: UpdateUserRequest,
         service: UserService = Depends()
-):
+) -> JSONResponse:
     response = service.update_user(user_id, user_data)
     return JSONResponse(content={"status": response})
 
@@ -62,6 +64,20 @@ def update_user(
 def delete_user(
         user_id: str,
         service: UserService = Depends()
-):
+) -> JSONResponse:
     response = service.delete_user(user_id)
     return JSONResponse(content={"status": response})
+
+
+@user_router.get(
+    "/workspace",
+    summary="User workspace data",
+    response_model=UserWorkspaceResponse,
+    response_model_by_alias=False
+)
+def user_workspace(
+        user_id: str,
+        service: UserService = Depends()
+) -> UserWorkspaceResponse:
+    response = service.get_user_workspace(user_id)
+    return response
