@@ -19,6 +19,7 @@ from app.src.core.schemas.responses.upload_response import MediaResponse
 from app.src.core.schemas.responses.get_uploads_response import GetUploadsResponseModel
 from app.src.core.repositories.aws_repositories import S3Repository
 
+
 class MediaService:
     def __init__(
             self,
@@ -94,7 +95,7 @@ class MediaService:
 
         return response
 
-    def get_uploads(self, user_id: int) -> List[GetUploadsResponseModel]:
+    def get_uploads(self, user_id: str) -> List[GetUploadsResponseModel]:
 
         if not self.user_repository.is_user_exists(user_id):
             raise BaseAppException(
@@ -108,6 +109,22 @@ class MediaService:
         response = [GetUploadsResponseModel.model_validate(record._asdict()) for record in records]
         return response
 
+    def get_all_uploads(self, user_id: str) -> List[GetUploadsResponseModel]:
+        if not self.user_repository.is_user_exists(user_id):
+            raise BaseAppException(
+                status_code=401,
+                description=f"No user exists with user id {user_id}",
+                data={'user_id': user_id, 'traceback': format_exc()},
+                # custom_error_code=CustomErrorCode.NOT_FOUND_ERROR
+            )
+
+        users = self.user_repository.get_team(user_id)
+        response: List[GetUploadsResponseModel] = []
+        for user in users:
+            response += self.get_uploads(user)
+
+        return response
+
     def get_media_stream(self, media_code: str) -> StreamingResponse:
         key, media_content = self.s3_repository.get_media_stream(media_code)
         if media_content is not None:
@@ -116,6 +133,12 @@ class MediaService:
                 media_type="application/octet-stream",
                 headers={"Content-Disposition": f"attachment; filename={key}"}
             )
+
+    def get_feedback(self, media_code):
+        self.media_repository.get_feedback(media_code)
+
+    def get_transcription(self, media_code):
+        self.media_repository.get_transcription(media_code)
 
     def _get_new_correlation_id(self) -> str:
         return str(uuid4())

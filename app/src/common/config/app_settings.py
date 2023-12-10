@@ -8,7 +8,8 @@ class Settings(BaseSettings):
     # TODO Add settings here
 
     # AWS Config
-    SECRET: str
+    MONGODB_SECRET: str
+    MYSQLDB_SECRET: str
     REGION: str
 
     # Database Configuration

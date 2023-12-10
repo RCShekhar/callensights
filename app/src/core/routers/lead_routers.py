@@ -36,3 +36,16 @@ def create_lead_type(
 ) -> JSONResponse:
     response = lead_service.create_lead_type(lead_type_input)
     return JSONResponse(content=response)
+
+
+# @lead_router.get(
+#     "/get-leads",
+#     summary="Get list of leads assigned to a rep or unassigned",
+#     response_model=GetLeadsResponseModel,
+#     response_model_by_alias=False
+# )
+# def get_leads(
+#         user_id: str,
+#         lead_service: LeadService = Depends()
+# ) -> JSONResponse:
+#     pass

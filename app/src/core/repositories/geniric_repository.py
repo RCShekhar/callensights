@@ -1,6 +1,5 @@
 from typing import Dict, Any, Type
 
-from fastapi import Depends
 from sqlalchemy.orm import Session
 
 from app.src.common.config.database import get_db_session
@@ -23,3 +22,7 @@ class GenericDBRepository:
         self.session.add(model_record)
         self.session.commit()
         return model_record
+
+    @handle_db_exception
+    def has_uploaded(self, media_code: str) -> bool:
+        return True  # TODO need to add logic to check if the upload happened or not

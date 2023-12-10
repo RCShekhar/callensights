@@ -4,6 +4,7 @@ from sqlalchemy import Row
 from app.src.common.decorators.db_exception_handlers import handle_db_exception
 from app.src.core.models.db_models import Media, Lead
 from app.src.core.repositories.geniric_repository import GenericDBRepository
+from app.src.common.config.database import get_mongodb
 
 
 class MediaRepository(GenericDBRepository):
@@ -11,6 +12,7 @@ class MediaRepository(GenericDBRepository):
             self
     ):
         super().__init__(Media)
+        self.mongo_db = get_mongodb()
 
     @handle_db_exception
     def register_media(self, media_model: Dict[str, Any]) -> bool:
@@ -48,3 +50,11 @@ class MediaRepository(GenericDBRepository):
             return None
 
         return rows[0][0]
+
+    def get_feedback(self, media_code: str) -> Any:
+        if self.has_uploaded(media_code):
+            return self.mongo_db.get_feedback(media_code)
+
+    def get_transcription(self, media_code: str) -> Any:
+        if self.has_uploaded(media_code):
+            return self.mongo_db.get_transcription(media_code)

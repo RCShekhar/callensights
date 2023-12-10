@@ -34,8 +34,16 @@ class User(Base):
     role: Mapped[str] = mapped_column('cu_role')
     created_dt: Mapped[datetime] = mapped_column('cu_created_dt', default=datetime.now())
     updated_dt: Mapped[datetime] = mapped_column('cu_updated_dt')
-    user_group: Mapped[int] = mapped_column('cu_user_group_id', ForeignKey('cns_user_group.ug_group_id'),
-                                            nullable=False)
+    user_group: Mapped[int] = mapped_column(
+        'cu_user_group_id',
+        ForeignKey('cns_user_group.ug_group_id'),
+        nullable=False
+    )
+    manager_id: Mapped[int] = mapped_column(
+        "cu_manager_id",
+        ForeignKey("cns_user_def.cu_user_id"),
+        nullable=True
+    )
 
     # TODO - implement relationship between user and usergroup
     # user_group: Mapped[List["UserGroup"]] = relationship("UserGroup", back_populates="User")
@@ -108,12 +116,13 @@ class GroupMessages(Base):
 
 
 class CallTypes(Base):
-    __tablename__ = "cns_call_types_def"
+    __tablename__ = "cns_lead_stage_def"
 
-    id: Mapped[int] = mapped_column('ct_call_type_id', primary_key=True)
-    code: Mapped[str] = mapped_column('ct_call_type_code')
-    description: Mapped[str] = mapped_column('ct_call_type_desc')
-    created_dt: Mapped[datetime] = mapped_column('ct_created_dt', default=datetime.now())
+    id: Mapped[int] = mapped_column('ls_stage_id', primary_key=True)
+    code: Mapped[str] = mapped_column('ls_stage_code')
+    description: Mapped[str] = mapped_column('ls_stage_desc')
+    created_dt: Mapped[datetime] = mapped_column('ls_created_dt', default=datetime.now())
+    modified_dt: Mapped[datetime] = mapped_column('ls_modified_dt')
 
 
 class LeadCallMetrics(Base):

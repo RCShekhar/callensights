@@ -13,7 +13,12 @@ class CreateUserRequest(BaseModel):
     organization: str
     role: str
     user_group: int
+    manager_id: Optional[str] = None
 
     @field_validator('email')
     def email_validation(cls, value) -> Optional[Any]:
         return validate_email(value)[-1]
+
+    @field_validator('manager_id')
+    def manager_validation(cls, value) -> Optional[Any]:
+        return None if value == 0 else value

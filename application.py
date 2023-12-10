@@ -15,6 +15,7 @@ from app.src.common.exceptions.exception_handlers import (
 from app.src.core.routers.media_routers import media_router
 from app.src.core.routers.users_routers import user_router
 from app.src.core.routers.lead_routers import lead_router
+
 application = FastAPI(
     docs_url="/callensights/docs",
     openapi_url="/callensights/openapi",
@@ -31,6 +32,7 @@ application.add_exception_handler(Exception, general_exception_handler)
 application.include_router(media_router, prefix="/media")
 application.include_router(user_router, prefix="/user")
 application.include_router(lead_router, prefix="/lead")
+
 
 @application.get("/", tags=["Home"])
 async def home():
