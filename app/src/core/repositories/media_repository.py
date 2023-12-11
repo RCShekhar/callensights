@@ -1,8 +1,8 @@
 from typing import Dict, Any, List, Optional
 
-from sqlalchemy import Row
+from sqlalchemy import Row, select
 from app.src.common.decorators.db_exception_handlers import handle_db_exception
-from app.src.core.models.db_models import Media, Lead
+from app.src.core.models.db_models import Media, Lead, User
 from app.src.core.repositories.geniric_repository import GenericDBRepository
 from app.src.common.config.database import get_mongodb
 
@@ -17,12 +17,22 @@ class MediaRepository(GenericDBRepository):
     @handle_db_exception
     def register_media(self, media_model: Dict[str, Any]) -> bool:
         response = False
+        clerk_id = media_model.get('user_id')
+        media_model['clerk_id'] = clerk_id
+        media_model['user_id'] = self.get_id_for_clerk(clerk_id)
         model = self.model(**media_model)
         self.session.add(model)
         self.session.commit()
         response = True
 
         return response
+
+    @handle_db_exception
+    def get_id_for_clerk(self, clerk_id: str) -> int:
+        stmt = select(User.id.label("user_id")).where(User.clerk_id == clerk_id)
+        row = self.session.execute(stmt).fetchone()
+        user_id = dict(row).get("user_id")
+        return user_id
 
     @handle_db_exception
     def get_uploads(self, user_id: int) -> List[Row]:

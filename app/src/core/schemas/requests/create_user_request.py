@@ -8,6 +8,7 @@ class CreateUserRequest(BaseModel):
     first_name: str
     middle_name: Optional[str] = ""
     last_name: Optional[str] = ""
+    image_url: Optional[str]
     email: str
     phone: str
     organization: str

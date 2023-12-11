@@ -1,6 +1,6 @@
 from typing import Optional, Dict, List, Any
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from app.src.common.decorators.db_exception_handlers import handle_db_exception
 from app.src.core.repositories.geniric_repository import GenericDBRepository
@@ -105,3 +105,10 @@ class LeadRepository(GenericDBRepository):
         result = self.session.execute(stmt).fetchall()
         rows = [dict(row) for row in result]
         return rows
+
+    @handle_db_exception
+    def update_stage(self, lead_id: int, stage_id: int) -> bool:
+        stmt = update(Lead).where(Lead.id == lead_id).values({'stage_id': stage_id})
+        self.session.execute(stmt)
+        self.session.commit()
+        return True

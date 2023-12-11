@@ -50,5 +50,19 @@ def lead_info(
         user_id: str,
         lead_service: LeadService = Depends()
 ) -> JSONResponse:
-    response= lead_service.get_lead_info(lead_id, user_id)
+    response = lead_service.get_lead_info(lead_id, user_id)
     return JSONResponse(content=response)
+
+
+@lead_router.patch(
+    "/update-lead-stage",
+    summary="Update stage of the user",
+    response_model_by_alias=False
+)
+def update_lead_stage(
+        lead_id: int,
+        user_id: str,
+        lead_service: LeadService = Depends()
+) -> JSONResponse:
+    status = lead_service.update_stage(lead_id, user_id)
+    return JSONResponse(content=status)

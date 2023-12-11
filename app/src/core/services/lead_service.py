@@ -39,13 +39,41 @@ class LeadService(BaseService):
         ).model_dump()
 
     def get_lead_info(self, lead_id: int, user_id: str) -> LeadInfoResponse:
+        self._assume_lead_exists(lead_id)
+        self._assume_user_exists(user_id)
+        self._assume_lead_assigned_to(lead_id, user_id)
+
+        data = self.repository.get_lead_info(lead_id)
+        data['conversations'] = self.repository.get_lead_conversations(lead_id, user_id)
+
+        response = LeadInfoResponse(**data)
+        return response
+
+    def update_stage(self, lead_id: int, user_id: str) -> Optional[str]:
+        self._assume_lead_exists(lead_id)
+        self._assume_user_exists(user_id)
+        self._assume_lead_assigned_to(lead_id, user_id)
+
+        self.repository.update_stage(lead_id)
+        return "SUCCESS"
+
+    def _assume_lead_exists(self, lead_id: int) -> None:
         if not self.repository.is_lead_exists(lead_id):
             raise BaseAppException(
-                status_code=404,
-                description="Invalid Lead info provided",
+                status_code=405,
+                description="Invalid lead id or no lead exists",
                 data={"lead_id": lead_id}
             )
 
+    def _assume_lead_assigned_to(self, lead_id: int, user_id: str) -> None:
+        if not self.repository.is_assigned_to(lead_id, user_id):
+            raise BaseAppException(
+                status_code=404,
+                description="The given lead not assigned to user",
+                data={"lead_id": lead_id, "user_id": user_id}
+            )
+
+    def _assume_user_exists(self, user_id: str) -> None:
         user_repository = UserRepository()
         if not user_repository.is_user_exists(user_id):
             raise BaseAppException(
@@ -53,16 +81,3 @@ class LeadService(BaseService):
                 description="No such user exists",
                 data={"user_id": user_id}
             )
-
-        if not self.repository.is_assigned_to(lead_id, user_id):
-            raise BaseAppException(
-                status_code=405,
-                description="Lead not assigned to user",
-                data={"lead_id": lead_id, "user_id": user_id}
-            )
-
-        data = self.repository.get_lead_info(lead_id)
-        data['conversations'] = self.repository.get_lead_conversations(lead_id, user_id)
-
-        response = LeadInfoResponse(**data)
-        return response
