@@ -17,7 +17,9 @@ class UserRepository(GenericDBRepository):
 
     # @handle_db_exception
     def add_user(self, user_model: CreateUserRequest) -> User:
-        manager_id, = self.session.execute(select(User.id).where(User.clerk_id == user_model.manager_id)).fetchone()
+        manager_id = None
+        if user_model.manager_id is not None and user_model.manager_id != "":
+            manager_id, = self.session.execute(select(User.id).where(User.clerk_id == user_model.manager_id)).fetchone()
         user_dump = user_model.model_dump()
         user_dump['clerk_id'] = user_dump['user_name']
         user_dump['manager_id'] = manager_id

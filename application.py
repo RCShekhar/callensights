@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi import HTTPException
 from fastapi.exception_handlers import http_exception_handler
 from fastapi.exceptions import RequestValidationError
+from starlette.middleware.cors import CORSMiddleware
 
 from app.src.common.exceptions.application_exception import BaseAppException
 from app.src.common.exceptions.exception_handlers import (
@@ -20,6 +21,16 @@ application = FastAPI(
     docs_url="/callensights/docs",
     openapi_url="/callensights/openapi",
     title="Callensights"
+)
+
+origins = ["*"]
+
+application.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 application.add_exception_handler(BaseAppException, app_exception_handler)

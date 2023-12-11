@@ -18,7 +18,17 @@ class LeadRepository(GenericDBRepository):
     @handle_db_exception
     def add_lead(self, lead_model: CreateLeadRequestModel) -> Optional[Lead]:
         dump = lead_model.model_dump()
-        print(dump)
+        row = self.session.execute(
+            select(LeadStages.id.label("stage_id")).where(LeadStages.code == dump['stage_code'])
+        ).fetchone()
+        dump.update(row._asdict())
+
+        row = self.session.execute(
+            select(User.id.label("assigned_to")).where(User.clerk_id == dump.get("user_id"))
+        ).fetchone()
+        dump.update(row._asdict())
+        del dump['user_id']
+        del dump['stage_code']
         lead = Lead(**dump)
         self.session.add(lead)
         self.session.commit()
@@ -47,26 +57,29 @@ class LeadRepository(GenericDBRepository):
     def get_stages(self) -> List[Dict[str, Any]]:
         stmt = select(
             LeadStages.id.label("stage_id"),
-            LeadStages.code.stage("stage_name")
+            LeadStages.code.label("stage_name")
         ).where(LeadStages.is_active == True)
 
         cursor = self.session.execute(stmt)
         stages = []
         for rec in cursor.fetchall():
-            stages.append(dict(rec))
+            stages.append(rec._asdict())
 
         return stages
 
     @handle_db_exception
     def get_assigned_leads(self, user_id: str) -> List[Dict[str, Any]]:
-        stmt = select(
+        stmt = (select(
             Lead.id.label("lead_id"),
             Lead.name.label("lead_name"),
             Lead.stage_id.label("stage_id")
-        ).where(Lead.assigned_to == user_id)
+        ).join(
+            User,
+            User.id == Lead.assigned_to
+        ).where(User.clerk_id == user_id))
 
         leads_cursor = self.session.execute(stmt)
-        leads = [dict(lead) for lead in leads_cursor.fetchall()]
+        leads = [lead._asdict() for lead in leads_cursor.fetchall()]
         return leads
 
     @handle_db_exception

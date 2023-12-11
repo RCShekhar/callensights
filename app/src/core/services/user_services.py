@@ -71,8 +71,8 @@ class UserService(BaseService):
     def get_user_workspace(
             self,
             user_id: str,
-            lead_repo: LeadRepository = Depends()
     ) -> UserWorkspaceResponse:
+        lead_repo: LeadRepository = LeadRepository()
         if not self.repository.is_user_exists(user_id):
             raise BaseAppException(
                 status_code=404,
@@ -81,7 +81,6 @@ class UserService(BaseService):
             )
 
         stages = lead_repo.get_stages()
-        stage_info = [StageInfo(**stage) for stage in stages]
         leads = lead_repo.get_assigned_leads(user_id)
 
         workspace_response = UserWorkspaceResponse(stages=stages, leads=leads)

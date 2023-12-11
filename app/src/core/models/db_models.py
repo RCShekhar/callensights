@@ -1,5 +1,4 @@
-from sqlalchemy.orm import declarative_base
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import declarative_base, Mapped, mapped_column
 from sqlalchemy import ForeignKey
 from datetime import datetime, date
 
@@ -129,9 +128,9 @@ class LeadCallMetrics(Base):
 
     id: Mapped[int] = mapped_column('lcm_id', primary_key=True)
 
-    lead_type_id: Mapped[int] = mapped_column('lcm_lead_type_id', ForeignKey('LeadTypes.id'), nullable=False)
-    call_type_id: Mapped[int] = mapped_column('lcm_call_type_id', ForeignKey('CallTypes.id'), nullable=False)
-    metrics_id: Mapped[int] = mapped_column('lcm_metrics_id', ForeignKey('Metrics.id'), nullable=False)
+    lead_type_id: Mapped[int] = mapped_column('lcm_lead_type_id', ForeignKey('cns_lead_types_def.lt_type_id'), nullable=False)
+    call_type_id: Mapped[int] = mapped_column('lcm_call_type_id', ForeignKey('cns_lead_stage_def.ls_stage_id'), nullable=False)
+    metrics_id: Mapped[int] = mapped_column('lcm_metrics_id', ForeignKey('cns_metrics_def.md_metric_id'), nullable=False)
 
     lcm_created_dt: Mapped[datetime] = mapped_column('lcm_created_dt', default=datetime.now())
 
@@ -145,8 +144,8 @@ class Lead(Base):
     phone: Mapped[str] = mapped_column('cl_phone', unique=True)
     country: Mapped[str] = mapped_column('cl_country')
     st_province: Mapped[str] = mapped_column('cl_state_province')
-    stage_id: Mapped[int] = mapped_column("cl_stage_id", ForeignKey('LeadStages.id'), nullable=True)
-    assigned_to: Mapped[int] = mapped_column("cl_assigned_to", ForeignKey('User.id'), nullable=True)
+    stage_id: Mapped[int] = mapped_column("cl_stage_id", ForeignKey('cns_lead_stage_def.ls_stage_id'), nullable=True)
+    assigned_to: Mapped[int] = mapped_column("cl_assigned_to", ForeignKey('cns_user_def.cu_user_id'), nullable=True)
     lead_desc: Mapped[str] = mapped_column("cl_lead_desc")
     created_dt: Mapped[datetime] = mapped_column('cl_created_dt', default=datetime.now())
     updated_dt: Mapped[datetime] = mapped_column('cl_updated_dt')
