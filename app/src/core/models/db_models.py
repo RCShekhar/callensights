@@ -61,6 +61,7 @@ class Media(Base):
     bucket: Mapped[str] = mapped_column('cm_bucket')
     event_date: Mapped[datetime] = mapped_column('cm_event_dt')
     rep_name: Mapped[str] = mapped_column('cm_rep_name')
+    is_uploaded: Mapped[bool] = mapped_column('cm_is_uploaded', nullable=False, default=False)
     # lead_name: Mapped[str] = mapped_column('cm_lead_name')
     # lead_type: Mapped[str] = mapped_column('cm_lead_type')
     conv_type: Mapped[str] = mapped_column('cm_conv_type')

@@ -20,7 +20,7 @@ user_router = APIRouter(tags=["Users"])
     response_model=CreateUserResponse,
     response_model_by_alias=False
 )
-def create_user(
+async def create_user(
         inputs: CreateUserRequest,
         service: UserService = Depends()
 ) -> JSONResponse:
@@ -34,7 +34,7 @@ def create_user(
     response_model=CreateUserGroupResponse,
     response_model_by_alias=False
 )
-def create_user_group(
+async def create_user_group(
         inputs: CreateUserGroupRequest,
         service: UserService = Depends()
 ) -> JSONResponse:
@@ -47,7 +47,7 @@ def create_user_group(
     summary="Update user details",
     response_model_by_alias=False
 )
-def update_user(
+async def update_user(
         user_id: str,
         user_data: UpdateUserRequest,
         service: UserService = Depends()
@@ -61,7 +61,7 @@ def update_user(
     summary="Delete an existing user",
     response_model_by_alias=False
 )
-def delete_user(
+async def delete_user(
         user_id: str,
         service: UserService = Depends()
 ) -> JSONResponse:
@@ -75,7 +75,7 @@ def delete_user(
     response_model=UserWorkspaceResponse,
     response_model_by_alias=False
 )
-def user_workspace(
+async def user_workspace(
         user_id: str,
         service: UserService = Depends()
 ) -> UserWorkspaceResponse:

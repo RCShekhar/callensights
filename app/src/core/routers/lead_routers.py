@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 
+# from app.src.core.schemas.responses.get_leads_response import GetLeadsResponse
 from app.src.core.services.lead_service import LeadService
 from app.src.core.schemas.requests.create_lead_request import CreateLeadRequestModel
 from app.src.core.schemas.responses.create_lead_response import CreateLeadResponseModel
@@ -31,7 +32,7 @@ async def create_lead(
     response_model=CreateLeadTypeResponseModel,
     response_model_by_alias=False
 )
-def create_lead_type(
+async def create_lead_type(
         lead_type_input: CreateLeadTypeRequestModel,
         lead_service: LeadService = Depends()
 ) -> JSONResponse:
@@ -45,7 +46,7 @@ def create_lead_type(
     response_model=LeadInfoResponse,
     response_model_by_alias=False
 )
-def lead_info(
+async def lead_info(
         lead_id: int,
         user_id: str,
         lead_service: LeadService = Depends()
@@ -59,10 +60,21 @@ def lead_info(
     summary="Update stage of the user",
     response_model_by_alias=False
 )
-def update_lead_stage(
+async def update_lead_stage(
         lead_id: int,
         user_id: str,
         lead_service: LeadService = Depends()
 ) -> JSONResponse:
     status = lead_service.update_stage(lead_id, user_id)
     return JSONResponse(content=status)
+
+# @lead_router.get(
+#     "/get-leads",
+#     summary="Get all available leads",
+#     response_model=GetLeadsResponse,
+#     response_model_by_alias=False
+# )
+# def get_loads(
+#         lead_service: LeadService = Depends()
+# ) -> JSONResponse:
+#     leads = lead_service.get_leads

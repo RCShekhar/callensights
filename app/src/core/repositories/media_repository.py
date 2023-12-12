@@ -18,7 +18,7 @@ class MediaRepository(GenericDBRepository):
     def register_media(self, media_model: Dict[str, Any]) -> bool:
         response = False
         clerk_id = media_model.get('user_id')
-        media_model['clerk_id'] = clerk_id
+        # media_model['clerk_id'] = clerk_id
         media_model['user_id'] = self.get_id_for_clerk(clerk_id)
         model = self.model(**media_model)
         self.session.add(model)
@@ -31,7 +31,7 @@ class MediaRepository(GenericDBRepository):
     def get_id_for_clerk(self, clerk_id: str) -> int:
         stmt = select(User.id.label("user_id")).where(User.clerk_id == clerk_id)
         row = self.session.execute(stmt).fetchone()
-        user_id = dict(row).get("user_id")
+        user_id = row._asdict().get("user_id")
         return user_id
 
     @handle_db_exception
