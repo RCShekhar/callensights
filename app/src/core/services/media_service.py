@@ -101,7 +101,8 @@ class MediaService:
             raise BaseAppException(
                 status_code=401,
                 description=f"No user exists with user id {user_id}",
-                data={'user_id': user_id, 'traceback': format_exc()}
+                data={'user_id': user_id, 'traceback': format_exc()},
+                custom_error_code=CustomErrorCode.NOT_FOUND_ERROR
             )
 
         records = self.media_repository.get_uploads(user_id)
@@ -115,7 +116,7 @@ class MediaService:
                 status_code=401,
                 description=f"No user exists with user id {user_id}",
                 data={'user_id': user_id, 'traceback': format_exc()},
-                # custom_error_code=CustomErrorCode.NOT_FOUND_ERROR
+                custom_error_code=CustomErrorCode.NOT_FOUND_ERROR
             )
 
         users = self.user_repository.get_team(user_id)

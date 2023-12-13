@@ -3,6 +3,7 @@ from typing import Optional, Any, Dict
 from fastapi import Depends
 from pydantic import BaseModel
 
+from app.src.common.enum.custom_error_code import CustomErrorCode
 from app.src.common.exceptions.application_exception import BaseAppException
 from app.src.core.schemas.responses.user_workspace_response import UserWorkspaceResponse, StageInfo, LeadPosition
 from app.src.core.services.base_service import BaseService
@@ -47,7 +48,8 @@ class UserService(BaseService):
             raise BaseAppException(
                 status_code=404,
                 description="No Such User found",
-                data={"user_id": user_id}
+                data={"user_id": user_id},
+                custom_error_code=CustomErrorCode.NOT_FOUND_ERROR
             )
 
         self.repository.update_user(user_id, user_details.model_dump())
@@ -61,7 +63,8 @@ class UserService(BaseService):
             raise BaseAppException(
                 status_code=404,
                 description="No Such User found",
-                data={"user_id": user_id}
+                data={"user_id": user_id},
+                custom_error_code=CustomErrorCode.NOT_FOUND_ERROR
             )
 
         self.repository.delete_user(user_id)
@@ -77,7 +80,8 @@ class UserService(BaseService):
             raise BaseAppException(
                 status_code=404,
                 description="No Such User found",
-                data={"user_id": user_id}
+                data={"user_id": user_id},
+                custom_error_code=CustomErrorCode.NOT_FOUND_ERROR
             )
 
         stages = lead_repo.get_stages()

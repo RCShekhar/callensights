@@ -3,6 +3,7 @@ from fastapi import Depends
 from pydantic import BaseModel
 
 from app.src.common.config.app_settings import get_app_settings, Settings
+from app.src.common.enum.custom_error_code import CustomErrorCode
 from app.src.common.exceptions.application_exception import BaseAppException
 from app.src.core.repositories.create_user_repository import UserRepository
 from app.src.core.schemas.responses.create_lead_response import CreateLeadResponseModel
@@ -62,7 +63,8 @@ class LeadService(BaseService):
             raise BaseAppException(
                 status_code=405,
                 description="Invalid lead id or no lead exists",
-                data={"lead_id": lead_id}
+                data={"lead_id": lead_id},
+                custom_error_code=CustomErrorCode.NOT_FOUND_ERROR
             )
 
     def _assume_lead_assigned_to(self, lead_id: int, user_id: str) -> None:
@@ -70,7 +72,8 @@ class LeadService(BaseService):
             raise BaseAppException(
                 status_code=404,
                 description="The given lead not assigned to user",
-                data={"lead_id": lead_id, "user_id": user_id}
+                data={"lead_id": lead_id, "user_id": user_id},
+                custom_error_code=CustomErrorCode.NOT_FOUND_ERROR
             )
 
     def _assume_user_exists(self, user_id: str) -> None:
@@ -79,5 +82,6 @@ class LeadService(BaseService):
             raise BaseAppException(
                 status_code=405,
                 description="No such user exists",
-                data={"user_id": user_id}
+                data={"user_id": user_id},
+                custom_error_code=CustomErrorCode.NOT_FOUND_ERROR
             )

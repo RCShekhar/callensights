@@ -16,7 +16,8 @@ def handle_db_exception(func: Callable) -> Callable:
             raise BaseAppException(
                 status_code=500,
                 description=str(e),
-                custom_error_code=CustomErrorCode.DATABASE_ERROR
+                custom_error_code=CustomErrorCode.DATABASE_ERROR,
+                data={'args': args, "kwargs": kwargs}
             )
 
     return wrapper
