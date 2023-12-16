@@ -1,3 +1,5 @@
+import json
+
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 
@@ -52,7 +54,7 @@ async def lead_info(
         lead_service: LeadService = Depends()
 ) -> JSONResponse:
     response = lead_service.get_lead_info(lead_id, user_id)
-    return JSONResponse(content=response)
+    return JSONResponse(content=response.model_dump())
 
 
 @lead_router.patch(

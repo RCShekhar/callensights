@@ -1,6 +1,6 @@
 from typing import Optional, Dict, List, Any
 
-from sqlalchemy import select, update
+from sqlalchemy import select, update, func
 
 from app.src.common.decorators.db_exception_handlers import handle_db_exception
 from app.src.core.repositories.geniric_repository import GenericDBRepository
@@ -83,8 +83,13 @@ class LeadRepository(GenericDBRepository):
         return leads
 
     @handle_db_exception
-    def is_assigned_to(self, lead_id: int, user_id: int) -> bool:
-        stmt = select(Lead.id).where(Lead.assigned_to == user_id)
+    def is_assigned_to(self, lead_id: int, user_id: str) -> bool:
+        stmt = select(
+            Lead.id
+        ).join(
+            User, User.id == Lead.assigned_to
+        ).where(User.clerk_id == user_id and Lead.id == lead_id)
+
         cursor = self.session.execute(stmt)
         if cursor.first() is None:
             return False
@@ -101,13 +106,13 @@ class LeadRepository(GenericDBRepository):
         ).where(Lead.id == lead_id)
 
         row = self.session.execute(stmt).first()
-        return dict(row)
+        return row._asdict()
 
     @handle_db_exception
     def get_lead_conversations(self, lead_id: int, user_id: str) -> List[Dict[str, Any]]:
         stmt = select(
-            Media.media_code("media_code"),
-            Media.event_date("event_date")
+            Media.media_code.label("media_code"),
+            Media.event_date.label("event_date")
         ).join(
             User,
             User.id == Media.user_id
@@ -116,7 +121,7 @@ class LeadRepository(GenericDBRepository):
         ).order_by(Media.event_date.desc())
 
         result = self.session.execute(stmt).fetchall()
-        rows = [dict(row) for row in result]
+        rows = [row._asdict() for row in result]
         return rows
 
     @handle_db_exception

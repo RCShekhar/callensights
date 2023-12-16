@@ -8,7 +8,7 @@ from app.src.common.exceptions.application_exception import BaseAppException
 from app.src.core.repositories.create_user_repository import UserRepository
 from app.src.core.schemas.responses.create_lead_response import CreateLeadResponseModel
 from app.src.core.schemas.responses.create_lead_type_response import CreateLeadTypeResponseModel
-from app.src.core.schemas.responses.lead_info_response import LeadInfoResponse
+from app.src.core.schemas.responses.lead_info_response import LeadInfoResponse, LeadConversation
 from app.src.core.services.base_service import BaseService
 from app.src.core.repositories.lead_repository import LeadRepository
 
@@ -47,6 +47,7 @@ class LeadService(BaseService):
         data = self.repository.get_lead_info(lead_id)
         data['conversations'] = self.repository.get_lead_conversations(lead_id, user_id)
 
+        # data['conversations'] = [LeadConversation(**conversation) for conversation in data['conversations']]
         response = LeadInfoResponse(**data)
         return response
 
