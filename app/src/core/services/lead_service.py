@@ -51,12 +51,12 @@ class LeadService(BaseService):
         response = LeadInfoResponse(**data)
         return response
 
-    def update_stage(self, lead_id: int, user_id: str) -> Optional[str]:
+    def update_stage(self, lead_id: int, user_id: str, stage_id: int) -> Optional[str]:
         self._assume_lead_exists(lead_id)
         self._assume_user_exists(user_id)
         self._assume_lead_assigned_to(lead_id, user_id)
 
-        self.repository.update_stage(lead_id)
+        self.repository.update_stage(lead_id, stage_id)
         return "SUCCESS"
 
     def _assume_lead_exists(self, lead_id: int) -> None:

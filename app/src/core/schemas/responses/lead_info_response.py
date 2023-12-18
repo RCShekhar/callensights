@@ -7,6 +7,8 @@ from typing import List, Optional, Any
 class LeadConversation(BaseModel):
     media_code: str
     event_date: datetime
+    call_type: str
+    lead_name: str
 
     @field_validator("event_date")
     def validate_event_date(cls, value) -> Any:

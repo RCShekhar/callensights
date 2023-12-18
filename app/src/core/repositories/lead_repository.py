@@ -110,15 +110,22 @@ class LeadRepository(GenericDBRepository):
 
     @handle_db_exception
     def get_lead_conversations(self, lead_id: int, user_id: str) -> List[Dict[str, Any]]:
-        stmt = select(
-            Media.media_code.label("media_code"),
-            Media.event_date.label("event_date")
-        ).join(
-            User,
-            User.id == Media.user_id
-        ).where(
-            User.clerk_id == user_id and Media.lead_id == lead_id
-        ).order_by(Media.event_date.desc())
+        stmt = (
+            select(
+                Media.media_code.label("media_code"),
+                Media.event_date.label("event_date"),
+                Media.conv_type.label("call_type"),
+                Lead.name.label("lead_name")
+            ).join(
+                User,
+                User.id == Media.user_id
+            ).join(
+                Lead,
+                Lead.id == Media.lead_id
+            ).where(
+                User.clerk_id == user_id and Media.lead_id == lead_id
+            ).order_by(Media.event_date.desc())
+        )
 
         result = self.session.execute(stmt).fetchall()
         rows = [row._asdict() for row in result]

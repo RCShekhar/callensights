@@ -65,9 +65,10 @@ async def lead_info(
 async def update_lead_stage(
         lead_id: int,
         user_id: str,
+        stage_id: int,
         lead_service: LeadService = Depends()
 ) -> JSONResponse:
-    status = lead_service.update_stage(lead_id, user_id)
+    status = lead_service.update_stage(lead_id, user_id, stage_id)
     return JSONResponse(content=status)
 
 # @lead_router.get(
