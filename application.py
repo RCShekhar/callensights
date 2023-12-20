@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi import HTTPException
 from fastapi.exception_handlers import http_exception_handler
 from fastapi.exceptions import RequestValidationError
@@ -43,6 +43,11 @@ application.add_exception_handler(Exception, general_exception_handler)
 application.include_router(media_router, prefix="/media")
 application.include_router(user_router, prefix="/user")
 application.include_router(lead_router, prefix="/lead")
+
+
+# @application.middleware("http")
+# async def authentication_token(request: Request, call_next):
+#     pass
 
 
 @application.get("/", tags=["Home"])

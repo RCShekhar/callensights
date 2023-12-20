@@ -115,17 +115,22 @@ class LeadRepository(GenericDBRepository):
                 Media.media_code.label("media_code"),
                 Media.event_date.label("event_date"),
                 Media.conv_type.label("call_type"),
-                Lead.name.label("lead_name")
+                Lead.name.label("lead_name"),
+                Lead.country.label("country"),
+                Lead.st_province.label("state")
             ).join(
                 User,
                 User.id == Media.user_id
             ).join(
                 Lead,
                 Lead.id == Media.lead_id
-            ).where(
-                User.clerk_id == user_id and Media.lead_id == lead_id
+            ).filter(
+                User.clerk_id == user_id
+            ).filter(
+                Media.lead_id == lead_id
             ).order_by(Media.event_date.desc())
         )
+        print(stmt)
 
         result = self.session.execute(stmt).fetchall()
         rows = [row._asdict() for row in result]

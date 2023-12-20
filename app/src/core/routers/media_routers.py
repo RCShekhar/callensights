@@ -40,18 +40,18 @@ async def get_uploads(
     return JSONResponse(content=[model.model_dump() for model in response])
 
 
-@media_router.get(
-    "/get-all-uploads",
-    summary="Get list of all media uploaded by self and team",
-    response_model=List[GetUploadsResponseModel],
-    response_model_by_alias=False
-)
-async def get_all_uploads(
-        user_id: str,
-        service: MediaService = Depends()
-):
-    response = service.get_all_uploads(user_id)
-    return JSONResponse(content=[model.model_dump() for model in response])
+# @media_router.get(
+#     "/get-all-uploads",
+#     summary="Get list of all media uploaded by self and team",
+#     response_model=List[GetUploadsResponseModel],
+#     response_model_by_alias=False
+# )
+# async def get_all_uploads(
+#         user_id: str,
+#         service: MediaService = Depends()
+# ):
+#     response = service.get_all_uploads(user_id)
+#     return JSONResponse(content=[model.model_dump() for model in response])
 
 
 @media_router.get(

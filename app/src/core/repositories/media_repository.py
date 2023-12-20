@@ -35,18 +35,34 @@ class MediaRepository(GenericDBRepository):
         return user_id
 
     @handle_db_exception
-    def get_uploads(self, user_id: int) -> List[Row]:
-        records = (self.session.query(
-            Media.media_code.label("media_code"),
-            Media.file_type.label("media_type"),
-            Media.media_size.label("media_size"),
-            Media.media_len.label("media_length"),
-            Lead.name.label("lead_name"),
-            Media.conv_type.label("conv_type")
-        ).join(
-            Lead,
-            Lead.id == Media.lead_id
-        ).filter(Media.user_id == user_id).all())
+    def get_uploads(self, user_id: str) -> List[Row]:
+        user_cur = self.session.execute(select(User.role).where(User.clerk_id == user_id))
+        user_role, = user_cur.fetchone()
+
+        query = (
+            select(
+                Media.media_code.label("media_code"),
+                Media.file_type.label("media_type"),
+                Media.media_size.label("media_size"),
+                Media.media_len.label("media_length"),
+                Lead.name.label("lead_name"),
+                Media.conv_type.label("conv_type")
+            ).join(
+                Lead,
+                Lead.id == Media.lead_id,
+                isouter=True
+            )
+        )
+        if user_role.upper() != 'ADMIN':
+            query = query.join(
+                User,
+                User.id == Media.user_id
+            ).filter(
+                User.clerk_id == user_id
+            )
+
+        print(query)
+        records = self.session.execute(query).all()
 
         return records
 
