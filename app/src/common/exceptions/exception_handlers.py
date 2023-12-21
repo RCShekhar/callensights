@@ -29,7 +29,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
     return JSONResponse(
         status_code=HTTPStatus.BAD_REQUEST,
-        content={'message': "FAILED", 'detail':  exc.errors()}
+        content={'message': "FAILED", 'details':  exc.errors()}
     )
 
 
@@ -38,5 +38,5 @@ async def general_exception_handler(request: Request, exc: BaseException) -> JSO
 
     return JSONResponse(
         status_code=500,
-        content={"message": "FAILED", "detail": "An Unknown error occurred."}
+        content={"message": "FAILED", "details": "An Unknown error occurred."}
     )

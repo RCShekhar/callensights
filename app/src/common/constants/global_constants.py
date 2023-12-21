@@ -1,4 +1,3 @@
-
 PROC_PARAMS = [
     'bucket',
     'file_name',
@@ -20,3 +19,7 @@ ALLOWED_TYPES = [
     "mp4",
     "avi"
 ]
+
+ALLOWED_ORIGINS = ["*"]
+ALLOWED_METHODS = ["*"]
+ALLOWED_HEADERS = ["*"]
