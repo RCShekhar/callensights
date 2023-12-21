@@ -23,3 +23,9 @@ ALLOWED_TYPES = [
 ALLOWED_ORIGINS = ["*"]
 ALLOWED_METHODS = ["*"]
 ALLOWED_HEADERS = ["*"]
+
+UNAUTHENTICATED_PATHS = [
+    "/",
+    "/callensights/docs",
+    "/callensights/openapi",
+]

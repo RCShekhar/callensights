@@ -8,24 +8,34 @@ from fastapi.exception_handlers import http_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.openapi.models import Response
 from starlette.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.middleware.gzip import GZipMiddleware
+from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_400_BAD_REQUEST
 
-from app.src.common.constants.global_constants import ALLOWED_ORIGINS, ALLOWED_METHODS, ALLOWED_HEADERS
-from app.src.common.enum.custom_error_code import CustomErrorCode
+
+from app.src.common.constants.global_constants import (
+    ALLOWED_ORIGINS,
+    ALLOWED_METHODS,
+    ALLOWED_HEADERS,
+    UNAUTHENTICATED_PATHS,
+)
+
 from app.src.common.exceptions.application_exception import BaseAppException
 from app.src.common.exceptions.exception_handlers import (
     app_exception_handler,
     general_exception_handler,
-    validation_exception_handler
+    validation_exception_handler,
 )
 from app.src.common.security.authorization import JWTDecoder
 from app.src.core.routers.media_routers import media_router
 from app.src.core.routers.users_routers import user_router
 from app.src.core.routers.lead_routers import lead_router
+from fastapi.middleware.gzip import GZipMiddleware
 
 application = FastAPI(
     docs_url="/callensights/docs",
     openapi_url="/callensights/openapi",
-    title="Callensights"
+    title="Callensights",
 )
 
 application.add_middleware(
@@ -35,6 +45,8 @@ application.add_middleware(
     allow_methods=ALLOWED_METHODS,
     allow_headers=ALLOWED_HEADERS,
 )
+application.add_middleware(GZipMiddleware, minimum_size=1000)
+
 
 application.add_exception_handler(BaseAppException, app_exception_handler)
 application.add_exception_handler(HTTPException, http_exception_handler)
@@ -47,49 +59,62 @@ application.include_router(media_router, prefix="/media")
 application.include_router(user_router, prefix="/user")
 application.include_router(lead_router, prefix="/lead")
 
+jwt_decoder = JWTDecoder()
 
-@application.middleware('http')
+
+@application.middleware("http")
 async def app_authorization(request: Request, call_next) -> Response:
-    authorization_header = request.headers.get('Authorization')
+    request_path = request.get("path")
+    if request_path in UNAUTHENTICATED_PATHS:
+        return await call_next(request)
+    authorization_header = request.headers.get("Authorization")
     if not authorization_header:
-        raise BaseAppException(
-            status_code=400,
-            description="Invalid Authorization token",
-            data = {'message': "Authorization header is missing"},
-            custom_error_code=CustomErrorCode.AUTHORIZATION_ERROR
+        return JSONResponse(
+            status_code=HTTP_400_BAD_REQUEST,
+            content={
+                "message": "Bad Request: The Authorization header is not present in your request. Please ensure you include it with the correct 'Bearer' token."
+            },
         )
-    jwt_decoder = JWTDecoder()
     try:
         decoded_payload = jwt_decoder.decode_jwt(authorization_header)
-        response = await call_next(decoded_payload)
+        request.state.user = decoded_payload
+        response = await call_next(request)
         return response
-    except jwt.ExpiredSignatureError as e:
-        raise BaseAppException(
-            status_code=401,
-            data={'message': str(e)},
-            description="JWT Error: Token Expired",
-            custom_error_code=CustomErrorCode.AUTHORIZATION_ERROR
+    except jwt.InvalidSignatureError:
+        return JSONResponse(
+            status_code=HTTP_401_UNAUTHORIZED,
+            content={
+                "message": "Unauthorized: The provided token is invalid. Please ensure you are using the correct token."
+            },
         )
-    except jwt.InvalidTokenError as e:
-        raise BaseAppException(
-            status_code=401,
-            description="JWT Error: Invalid Token",
-            data={'message':str(e)},
-            custom_error_code=CustomErrorCode.AUTHORIZATION_ERROR
+    except jwt.ExpiredSignatureError:
+        return JSONResponse(
+            status_code=HTTP_401_UNAUTHORIZED,
+            content={
+                "message": "Unauthorized: The provided token has expired. Please refresh your token."
+            },
         )
-    except Exception as e:
-        raise BaseAppException(
-            status_code=401,
-            description="Unknown JWT exception",
-            data={'message': str(e)},
-            custom_error_code=CustomErrorCode.UNKNOWN_ERROR
+    except jwt.InvalidTokenError:
+        return JSONResponse(
+            status_code=HTTP_401_UNAUTHORIZED,
+            content={
+                "message": "Unauthorized: You must be authenticated to perform this request. The provided token is invalid or malformed."
+            },
         )
-
+    except Exception:
+        return JSONResponse(
+            status_code=HTTP_401_UNAUTHORIZED,
+            content={
+                "message": "An unexpected error occurred. Please try again later, and if the problem persists, contact support."
+            },
+        )
 
 
 @application.get("/", tags=["Home"])
 async def home():
-    return {"time": datetime.now().strftime("%d/%m/%Y, %H:%M:%S")}
+    return {
+        "time": datetime.now().strftime("%d/%m/%Y, %H:%M:%S"),
+    }
 
 
 @application.on_event("startup")
