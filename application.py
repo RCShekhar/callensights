@@ -1,15 +1,17 @@
 from datetime import datetime
-from typing import Any
 
 import jwt
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends
 from fastapi import HTTPException
 from fastapi.exception_handlers import http_exception_handler
 from fastapi.exceptions import RequestValidationError
+from fastapi.openapi.models import Response
 from starlette.middleware.cors import CORSMiddleware
-from starlette.responses import JSONResponse
+from fastapi.responses import JSONResponse
+from fastapi.middleware.gzip import GZipMiddleware
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_400_BAD_REQUEST
+
 
 from app.src.common.constants.global_constants import (
     ALLOWED_ORIGINS,
@@ -45,6 +47,7 @@ application.add_middleware(
 )
 application.add_middleware(GZipMiddleware, minimum_size=1000)
 
+
 application.add_exception_handler(BaseAppException, app_exception_handler)
 application.add_exception_handler(HTTPException, http_exception_handler)
 application.add_exception_handler(RequestValidationError, validation_exception_handler)
@@ -59,71 +62,57 @@ application.include_router(lead_router, prefix="/lead")
 jwt_decoder = JWTDecoder()
 
 
-@application.middleware("http")
-async def app_authorization(request: Request, call_next) -> JSONResponse | Any:
-    request_path = request.get("path")
-    if request_path in UNAUTHENTICATED_PATHS:
-        return await call_next(request)
-    authorization_header = request.headers.get("Authorization")
-    if not authorization_header:
-        return JSONResponse(
-            status_code=HTTP_400_BAD_REQUEST,
-            content={
-                "message": "Bad Request: The Authorization header is not present in your request. Please ensure you include it with the correct 'Bearer' token."
-            },
-        )
-    try:
-        decoded_payload = jwt_decoder.decode_jwt(authorization_header)
-        request.state.user = decoded_payload
-        response = await call_next(request)
-        return response
-    except jwt.InvalidSignatureError:
-        return JSONResponse(
-            status_code=HTTP_401_UNAUTHORIZED,
-            content={
-                "message": "Unauthorized: The provided token is invalid. Please ensure you are using the correct token."
-            },
-        )
-    except jwt.ExpiredSignatureError:
-        return JSONResponse(
-            status_code=HTTP_401_UNAUTHORIZED,
-            content={
-                "message": "Unauthorized: The provided token has expired. Please refresh your token."
-            },
-        )
-    except jwt.InvalidTokenError as e:
-        print(e)
-        return JSONResponse(
-            status_code=HTTP_401_UNAUTHORIZED,
-            content={
-                "message": "Unauthorized: You must be authenticated to perform this request. The provided token is invalid or malformed."
-            },
-        )
-    except Exception as e:
-        print(e)
-        return JSONResponse(
-            status_code=HTTP_401_UNAUTHORIZED,
-            content={
-                "message": "An unexpected error occurred. Please try again later, and if the problem persists, contact support."
-            },
-        )
+from fastapi import Request, HTTPException
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 
-@application.get("/", tags=["Home"])
+class JWTBearer(HTTPBearer):
+    def __init__(self, auto_error: bool = True):
+        super(JWTBearer, self).__init__(auto_error=auto_error)
+
+    async def __call__(self, request: Request):
+        credentials: HTTPAuthorizationCredentials = await super(
+            JWTBearer, self
+        ).__call__(request)
+        if credentials:
+            if not credentials.scheme == "Bearer":
+                raise HTTPException(
+                    status_code=403, detail="Invalid authentication scheme."
+                )
+            else:
+                try:
+                    decoded_payload = jwt_decoder.decode_jwt(credentials.credentials)
+                except jwt.InvalidSignatureError:
+                    raise HTTPException(
+                        status_code=403,
+                        detail="Unauthorized: The provided token is invalid. Please ensure you are using the correct token.",
+                    )
+                except jwt.ExpiredSignatureError:
+                    raise HTTPException(
+                        status_code=403,
+                        detail="Unauthorized: The provided token has expired. Please refresh your token.",
+                    )
+                except jwt.InvalidTokenError:
+                    raise HTTPException(
+                        status_code=403,
+                        detail="Unauthorized: You must be authenticated to perform this request. The provided token is invalid or malformed.f",
+                    )
+                except Exception:
+                    raise HTTPException(
+                        status_code=403,
+                        detail="An unexpected error occurred. Please try again later, and if the problem persists, contact support.",
+                    )
+
+            return decoded_payload
+        else:
+            raise HTTPException(status_code=403, detail="Invalid authorization code.")
+
+
+@application.get("/", dependencies=[Depends(JWTBearer())], tags=["Home"])
 async def home():
     return {
         "time": datetime.now().strftime("%d/%m/%Y, %H:%M:%S"),
     }
-
-
-@application.on_event("startup")
-def startup() -> None:
-    pass
-
-
-@application.on_event("shutdown")
-def shutdown() -> None:
-    pass
 
 
 if __name__ == "__main__":
