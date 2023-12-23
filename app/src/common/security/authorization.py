@@ -4,6 +4,8 @@ from typing import Optional, TypedDict
 from botocore.exceptions import ClientError
 import boto3
 
+from app.src.common.config.app_settings import get_app_settings
+
 
 class DecodedPayload(TypedDict, total=False):
     """
@@ -46,8 +48,9 @@ class JWTDecoder:
     """
 
     def __init__(self):
+        self.settings = get_app_settings()
         self.decoding_algorithm = "RS256"
-        self.audience = "callensights-api-prod"
+        self.audience = self.settings.CLERK_AUDIENCE
         self.boto_session = boto3.session.Session()
         self.boto_client = self.boto_session.client(
             service_name="secretsmanager",
@@ -87,6 +90,7 @@ class JWTDecoder:
         """
         secret = self.get_secret()
         jw_token = self.extract_bearer_token(token)
+        print(jw_token)
         try:
             payload = jwt.decode(
                 jw_token,
@@ -113,7 +117,8 @@ class JWTDecoder:
         Raises:
             Exception: If failed to retrieve the secret.
         """
-        SECRET_NAME = "callensights/clerk"
+
+        SECRET_NAME = self.settings.CLERK_SECRET
 
         try:
             get_secret_value_response = self.boto_client.get_secret_value(

@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     # AWS Config
     MONGODB_SECRET: str
     MYSQLDB_SECRET: str
+    CLERK_SECRET: str
+    CLERK_AUDIENCE: str
     REGION: str
 
     # Database Configuration

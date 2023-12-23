@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 
 import jwt
 import uvicorn
@@ -6,12 +7,9 @@ from fastapi import FastAPI, Request
 from fastapi import HTTPException
 from fastapi.exception_handlers import http_exception_handler
 from fastapi.exceptions import RequestValidationError
-from fastapi.openapi.models import Response
 from starlette.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from fastapi.middleware.gzip import GZipMiddleware
+from starlette.responses import JSONResponse
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_400_BAD_REQUEST
-
 
 from app.src.common.constants.global_constants import (
     ALLOWED_ORIGINS,
@@ -47,7 +45,6 @@ application.add_middleware(
 )
 application.add_middleware(GZipMiddleware, minimum_size=1000)
 
-
 application.add_exception_handler(BaseAppException, app_exception_handler)
 application.add_exception_handler(HTTPException, http_exception_handler)
 application.add_exception_handler(RequestValidationError, validation_exception_handler)
@@ -63,7 +60,7 @@ jwt_decoder = JWTDecoder()
 
 
 @application.middleware("http")
-async def app_authorization(request: Request, call_next) -> Response:
+async def app_authorization(request: Request, call_next) -> JSONResponse | Any:
     request_path = request.get("path")
     if request_path in UNAUTHENTICATED_PATHS:
         return await call_next(request)
@@ -94,14 +91,16 @@ async def app_authorization(request: Request, call_next) -> Response:
                 "message": "Unauthorized: The provided token has expired. Please refresh your token."
             },
         )
-    except jwt.InvalidTokenError:
+    except jwt.InvalidTokenError as e:
+        print(e)
         return JSONResponse(
             status_code=HTTP_401_UNAUTHORIZED,
             content={
                 "message": "Unauthorized: You must be authenticated to perform this request. The provided token is invalid or malformed."
             },
         )
-    except Exception:
+    except Exception as e:
+        print(e)
         return JSONResponse(
             status_code=HTTP_401_UNAUTHORIZED,
             content={

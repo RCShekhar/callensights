@@ -1,7 +1,7 @@
 import traceback
 from http import HTTPStatus
 
-from fastapi import HTTPException, Request
+from fastapi import Request
 from fastapi.exceptions import RequestValidationError
 from starlette.responses import JSONResponse
 
