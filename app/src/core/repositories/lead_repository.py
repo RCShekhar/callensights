@@ -1,12 +1,11 @@
 from typing import Optional, Dict, List, Any
 
-from sqlalchemy import select, update, func
+from sqlalchemy import select, update
 
 from app.src.common.decorators.db_exception_handlers import handle_db_exception
-from app.src.core.repositories.geniric_repository import GenericDBRepository
-from app.src.core.schemas.requests.create_lead_request import CreateLeadRequestModel
-from app.src.core.schemas.requests.create_lead_type_request import CreateLeadTypeRequestModel
 from app.src.core.models.db_models import LeadTypes, Lead, LeadStages, Media, User
+from app.src.core.repositories.geniric_repository import GenericDBRepository
+from app.src.core.schemas.requests.create_lead_type_request import CreateLeadTypeRequestModel
 
 
 class LeadRepository(GenericDBRepository):
@@ -16,8 +15,8 @@ class LeadRepository(GenericDBRepository):
         super().__init__(Lead)
 
     @handle_db_exception
-    def add_lead(self, lead_model: CreateLeadRequestModel) -> Optional[Lead]:
-        dump = lead_model.model_dump()
+    def add_lead(self, lead_model: Dict[str, Any]) -> Optional[Lead]:
+        dump = lead_model
         row = self.session.execute(
             select(LeadStages.id.label("stage_id")).where(LeadStages.code == dump['stage_code'])
         ).fetchone()
@@ -35,10 +34,8 @@ class LeadRepository(GenericDBRepository):
         return lead
 
     @handle_db_exception
-    def add_lead_type(self, type_model: CreateLeadTypeRequestModel) -> Optional[LeadTypes]:
-        dump = type_model.model_dump()
-        print(dump)
-        lead_type = LeadTypes(**dump)
+    def add_lead_type(self, type_model: Dict[str, Any]) -> Optional[LeadTypes]:
+        lead_type = LeadTypes(**type_model)
         self.session.add(lead_type)
         self.session.commit()
         return lead_type
@@ -58,7 +55,7 @@ class LeadRepository(GenericDBRepository):
         stmt = select(
             LeadStages.id.label("stage_id"),
             LeadStages.code.label("stage_name")
-        ).where(LeadStages.is_active == True)
+        ).where(LeadStages.is_active is True)
 
         cursor = self.session.execute(stmt)
         stages = []
@@ -142,3 +139,22 @@ class LeadRepository(GenericDBRepository):
         self.session.execute(stmt)
         self.session.commit()
         return True
+
+    @handle_db_exception
+    def is_admin_user(self, user_id: str) -> bool:
+        query = select(User.id).filter(User.clerk_id == user_id).filter(User.role == 'ADMIN')
+        row = self.session.execute(query).fetchone()
+        status = True if row else False
+        return status
+
+    @handle_db_exception
+    def assign_lead(self, lead_id: int, user_id: str) -> None:
+        user_query = select(User.id.label('user_id')).where(User.clerk_id == user_id)
+        uid, = self.session.execute(user_query).fetchone()
+        query = update(Lead).where(Lead.id == lead_id).values(
+            {
+                'assigned_to': uid
+            }
+        )
+        self.session.execute(query)
+        self.session.commit()

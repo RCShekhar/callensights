@@ -1,6 +1,6 @@
 import datetime
 import json
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from uuid import uuid4
 from traceback import format_exc
 
@@ -32,10 +32,10 @@ class MediaService:
         self.user_repository = UserRepository()
         self.s3_repository = S3Repository()
 
-    def register_media(self, media_input: UploadMediaInputsModel) -> Optional[List[MediaResponse]]:
+    def register_media(self, media_input: Dict[str, Any]) -> Optional[List[MediaResponse]]:
         response = []
 
-        request_dump = media_input.model_dump().copy()
+        request_dump = media_input
         files = request_dump.get('files')
         del request_dump['files']
         for file in files:
@@ -126,7 +126,9 @@ class MediaService:
 
         return response
 
-    def get_media_stream(self, media_code: str) -> StreamingResponse:
+    def get_media_stream(self, media_code: str, user_id: str) -> StreamingResponse:
+        self.media_repository.assume_media_assigned_to(media_code, user_id)
+
         key, media_content = self.s3_repository.get_media_stream(media_code)
         if media_content is not None:
             return StreamingResponse(
@@ -135,11 +137,11 @@ class MediaService:
                 headers={"Content-Disposition": f"attachment; filename={key}"}
             )
 
-    def get_feedback(self, media_code):
+    def get_feedback(self, media_code: str, user_id: str):
+        self.media_repository.assume_media_assigned_to(media_code, user_id)
         self.media_repository.get_feedback(media_code)
 
-    def get_transcription(self, media_code):
+    def get_transcription(self, media_code: str, user_id: str):
+        self.media_repository.assume_media_assigned_to(media_code, user_id)
         self.media_repository.get_transcription(media_code)
 
-    def _get_new_correlation_id(self) -> str:
-        return str(uuid4())

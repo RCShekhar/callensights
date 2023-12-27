@@ -2,6 +2,8 @@ from typing import Dict, Any, List, Optional
 
 from sqlalchemy import Row, select
 from app.src.common.decorators.db_exception_handlers import handle_db_exception
+from app.src.common.enum.custom_error_code import CustomErrorCode
+from app.src.common.exceptions.application_exception import BaseAppException
 from app.src.core.models.db_models import Media, Lead, User
 from app.src.core.repositories.geniric_repository import GenericDBRepository
 from app.src.common.config.database import get_mongodb
@@ -84,3 +86,35 @@ class MediaRepository(GenericDBRepository):
     def get_transcription(self, media_code: str) -> Any:
         if self.has_uploaded(media_code):
             return self.mongo_db.get_transcription(media_code)
+
+    def is_assigned_to(self, media_code: str, user_id: str) -> bool:
+        result: bool = False
+
+        query = select(
+            Media.media_code
+        ).join(
+            User,
+            User.id == Media.user_id
+        ).filter(
+            User.clerk_id == user_id
+        ).filter(
+            Media.media_code == media_code
+        )
+
+        rec = self.session.execute(query).fetchone()
+        if rec:
+            result = True
+
+        return result
+
+    def assume_media_assigned_to(self, media_code: str, user_id: str) -> None:
+        if not self.is_assigned_to(media_code, user_id):
+            raise BaseAppException(
+                status_code=404,
+                description="The Media not assigned to user",
+                data={
+                    'media_code': media_code,
+                    'user_id': user_id
+                },
+                custom_error_code=CustomErrorCode.NOT_FOUND_ERROR
+            )

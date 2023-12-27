@@ -3,7 +3,6 @@ from pydantic import BaseModel
 
 
 class CreateLeadRequestModel(BaseModel):
-    user_id: str
     name: str
     email: str
     phone: str

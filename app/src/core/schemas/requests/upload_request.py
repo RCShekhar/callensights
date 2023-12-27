@@ -6,7 +6,6 @@ from app.src.common.constants.global_constants import ALLOWED_TYPES
 
 
 class UploadMediaInputsModel(BaseModel):
-    user_id: str
     rep_name: Optional[str] = ""
     lead_id: int
     conv_type: str

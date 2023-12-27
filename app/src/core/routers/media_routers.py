@@ -3,6 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse, StreamingResponse
 
+from app.src.common.security.authorization import JWTBearer, DecodedPayload
 from app.src.core.schemas.responses.upload_response import MediaResponse
 from app.src.core.schemas.requests.upload_request import UploadMediaInputsModel
 from app.src.core.services.media_service import MediaService
@@ -19,9 +20,12 @@ media_router = APIRouter(tags=["Media"])
 )
 async def upload_media(
         inputs: UploadMediaInputsModel,
-        upload_service: MediaService = Depends()
-):
-    response = upload_service.register_media(inputs)
+        upload_service: MediaService = Depends(),
+        decoaded_payload: DecodedPayload = Depends(JWTBearer())
+) -> JSONResponse:
+    input_dict = inputs.model_dump()
+    input_dict['user_id'] = decoaded_payload.get('user_id')
+    response = upload_service.register_media(input_dict)
 
     return JSONResponse(content=[model.model_dump() for model in response])
 
@@ -33,25 +37,13 @@ async def upload_media(
     response_model_by_alias=False
 )
 async def get_uploads(
-        user_id: str,
-        service: MediaService = Depends()
-):
+        # user_id: str,
+        service: MediaService = Depends(),
+        decoaded_payload: DecodedPayload = Depends(JWTBearer())
+) -> JSONResponse:
+    user_id = decoaded_payload.get('user_id')
     response = service.get_uploads(user_id)
     return JSONResponse(content=[model.model_dump() for model in response])
-
-
-# @media_router.get(
-#     "/get-all-uploads",
-#     summary="Get list of all media uploaded by self and team",
-#     response_model=List[GetUploadsResponseModel],
-#     response_model_by_alias=False
-# )
-# async def get_all_uploads(
-#         user_id: str,
-#         service: MediaService = Depends()
-# ):
-#     response = service.get_all_uploads(user_id)
-#     return JSONResponse(content=[model.model_dump() for model in response])
 
 
 @media_router.get(
@@ -62,9 +54,11 @@ async def get_uploads(
 )
 async def get_media(
         media_code: str,
-        media_service: MediaService = Depends()
+        media_service: MediaService = Depends(),
+        decoaded_payload: DecodedPayload = Depends(JWTBearer())
 ) -> StreamingResponse:
-    return media_service.get_media_stream(media_code)
+    user_id = decoaded_payload.get('user_id')
+    return media_service.get_media_stream(media_code, user_id)
 
 
 @media_router.get(
@@ -74,9 +68,11 @@ async def get_media(
 )
 async def get_feedback(
         media_code: str,
-        media_service: MediaService = Depends()
-):
-    return media_service.get_feedback(media_code)
+        media_service: MediaService = Depends(),
+        decoaded_payload: DecodedPayload = Depends(JWTBearer())
+) -> JSONResponse:
+    user_id = decoaded_payload.get('user_id')
+    return media_service.get_feedback(media_code, user_id)
 
 
 @media_router.get(
@@ -86,6 +82,8 @@ async def get_feedback(
 )
 async def get_transcript(
         media_code: str,
-        media_service: MediaService = Depends()
-):
-    return media_service.get_transcription(media_code)
+        media_service: MediaService = Depends(),
+        decoaded_payload: DecodedPayload = Depends(JWTBearer())
+) -> JSONResponse:
+    user_id = decoaded_payload.get('user_id')
+    return media_service.get_transcription(media_code, user_id)

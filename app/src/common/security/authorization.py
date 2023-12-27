@@ -5,6 +5,8 @@ from botocore.exceptions import ClientError
 import boto3
 
 from app.src.common.config.app_settings import get_app_settings
+from fastapi import Request, HTTPException
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 
 class DecodedPayload(TypedDict, total=False):
@@ -13,18 +15,7 @@ class DecodedPayload(TypedDict, total=False):
 
     Attributes:
         aud (str): Audience claim.
-        azp (str): Authorized party claim.
-        created_dt (int): Creation timestamp of the token.
         email (str): Email claim.
-        exp (int): Expiration timestamp of the token.
-        first_name (Optional[str]): First name claim (optional).
-        iat (int): Issued At timestamp of the token.
-        iss (str): Issuer claim.
-        jti (str): JWT ID claim.
-        last_name (Optional[str]): Last name claim (optional).
-        nbf (int): Not Before timestamp of the token.
-        ph_number (Optional[str]): Phone number claim (optional).
-        sub (str): Subject claim.
         user_id (str): User ID claim.
         user_name (str): User name claim.
     """
@@ -89,11 +80,9 @@ class JWTDecoder:
             jwt.InvalidTokenError: If the token is invalid.
         """
         secret = self.get_secret()
-        jw_token = self.extract_bearer_token(token)
-        print(jw_token)
         try:
             payload = jwt.decode(
-                jw_token,
+                token,
                 secret,
                 algorithms=[self.decoding_algorithm],
                 audience=self.audience,
@@ -160,6 +149,51 @@ def main():
         logger.error("Error decoding the JWT: Invalid token.")
     except Exception as e:
         logger.error("Error decoding the JWT: %s", e)
+
+
+jwt_decoder = JWTDecoder()
+
+
+class JWTBearer(HTTPBearer):
+    def __init__(self, auto_error: bool = True):
+        super(JWTBearer, self).__init__(auto_error=auto_error)
+
+    async def __call__(self, request: Request):
+        credentials: HTTPAuthorizationCredentials = await super(
+            JWTBearer, self
+        ).__call__(request)
+        if credentials:
+            if not credentials.scheme == "Bearer":
+                raise HTTPException(
+                    status_code=403, detail="Invalid authentication scheme."
+                )
+            else:
+                try:
+                    decoded_payload = jwt_decoder.decode_jwt(credentials.credentials)
+                except jwt.InvalidSignatureError:
+                    raise HTTPException(
+                        status_code=403,
+                        detail="Unauthorized: The provided token is invalid. Please ensure you are using the correct token.",
+                    )
+                except jwt.ExpiredSignatureError:
+                    raise HTTPException(
+                        status_code=403,
+                        detail="Unauthorized: The provided token has expired. Please refresh your token.",
+                    )
+                except jwt.InvalidTokenError:
+                    raise HTTPException(
+                        status_code=403,
+                        detail="Unauthorized: You must be authenticated to perform this request. The provided token is invalid or malformed.f",
+                    )
+                except Exception:
+                    raise HTTPException(
+                        status_code=403,
+                        detail="An unexpected error occurred. Please try again later, and if the problem persists, contact support.",
+                    )
+
+            return decoded_payload
+        else:
+            raise HTTPException(status_code=403, detail="Invalid authorization code.")
 
 
 if __name__ == "__main__":
