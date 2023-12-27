@@ -55,7 +55,7 @@ class LeadRepository(GenericDBRepository):
         stmt = select(
             LeadStages.id.label("stage_id"),
             LeadStages.code.label("stage_name")
-        ).where(LeadStages.is_active is True)
+        ).where(LeadStages.is_active == True)
 
         cursor = self.session.execute(stmt)
         stages = []
@@ -99,7 +99,13 @@ class LeadRepository(GenericDBRepository):
             Lead.name.label("lead_name"),
             Lead.email.label("email"),
             Lead.phone.label("phone"),
-            Lead.lead_desc.label("description")
+            Lead.country.label("country"),
+            Lead.st_province.label("state"),
+            Lead.lead_desc.label("description"),
+            User.clerk_id.label("assigned_clerk_id")
+        ).join(
+            User,
+            User.id == Lead.assigned_to
         ).where(Lead.id == lead_id)
 
         row = self.session.execute(stmt).first()
@@ -127,7 +133,6 @@ class LeadRepository(GenericDBRepository):
                 Media.lead_id == lead_id
             ).order_by(Media.event_date.desc())
         )
-        print(stmt)
 
         result = self.session.execute(stmt).fetchall()
         rows = [row._asdict() for row in result]

@@ -63,7 +63,6 @@ class MediaRepository(GenericDBRepository):
                 User.clerk_id == user_id
             )
 
-        print(query)
         records = self.session.execute(query).all()
 
         return records

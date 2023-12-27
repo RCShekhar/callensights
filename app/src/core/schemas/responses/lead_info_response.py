@@ -23,6 +23,9 @@ class LeadConversation(BaseModel):
 class LeadInfoResponse(BaseModel):
     lead_id: int
     lead_name: str
+    assigned_clerk_id: Optional[str]
+    country: Optional[str]
+    state: Optional[str]
     email: str
     phone: str
     description: Optional[str] = None

@@ -70,12 +70,13 @@ class LeadService(BaseService):
         self._assume_user_exists(user_id)
         is_admin = self.repository.is_admin_user(user_id)
 
+        if target_user is not None or target_user != '':
+            has_target_user = not has_target_user
+            self._assume_user_exists(target_user)
+
         for lead_id in lead_ids:
             status = 'SUCCESS'
             self._assume_lead_exists(lead_id)
-            if target_user is not None or target_user != '':
-                has_target_user = not has_target_user
-                self._assume_user_exists(target_user)
 
             to_user = user_id
             if is_admin and has_target_user:
