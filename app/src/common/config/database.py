@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import Optional
+from typing import Optional, Dict, Any
 
 from pymongo.results import InsertOneResult
 from sqlalchemy import create_engine, URL
@@ -45,12 +45,12 @@ class MongoDB:
         Get MongoDB connection using the provided credentials.
         """
 
-        if not self.client:
-            user_name = self.secret_mgr.mongo_db_secret('username')
-            password = self.secret_mgr.mongo_db_secret('password')
-            host = self.secret_mgr.mongo_db_secret("host")
-            mongo_url = f"mongodb+srv://{user_name}:{password}@{host}/?retryWrites=true&w=majority"
-            self.client = MongoClient(mongo_url)
+        user_name = self.secret_mgr.mongo_db_secret('username')
+        password = self.secret_mgr.mongo_db_secret('password')
+        host = self.secret_mgr.mongo_db_secret("host")
+        mongo_url = f"mongodb+srv://{user_name}:{password}@{host}/?retryWrites=true&w=majority"
+        print(mongo_url)
+        self.client = MongoClient(mongo_url)
         return self.client
 
     def put_feedback(self, feedback, collection_name="feedbacks") -> InsertOneResult:
@@ -62,14 +62,17 @@ class MongoDB:
             collection = db[collection_name]
             return collection.insert_one(feedback)
 
-    def get_transcription(self, media_code, collection_name="transcriptions") -> str:
+    def get_transcription(self, media_code: str, collection_name:str="transcriptions") -> Dict[str, Any]:
         """
         Get transcription data from the MongoDB.
         """
         with self.get_connection() as client:
             db = client[self.database]
             collection = db[collection_name]
-            return collection.find_one({"media_code": str(media_code)})
+            response = collection.find_one({"media_code": media_code})
+            response = dict(response).copy()
+            del response['_id']
+            return response
 
     def put_transcription(self, transcription, collection_name="transcriptions") -> InsertOneResult:
         """
@@ -80,14 +83,17 @@ class MongoDB:
             collection = db[collection_name]
             return collection.insert_one(transcription)
 
-    def get_feedback(self, media_code: str, collection_name="feedback") -> str:
+    def get_feedback(self, media_code: str, collection_name="feedbacks") -> str:
         """
         Get Feedback data from the MongoDB.
         """
         with self.get_connection() as client:
             db = client[self.database]
             collection = db[collection_name]
-            return collection.find_one({"media_code": str(media_code)})
+            response = collection.find_one({"media_code": media_code})
+            response = dict(response).copy()
+            del response['_id']
+            return response
 
 
 def get_db_session():

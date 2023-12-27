@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Any
 from boto3 import client
 from fastapi import Depends
 
@@ -7,21 +7,22 @@ from app.src.common.enum.custom_error_code import CustomErrorCode
 from app.src.common.config.app_settings import get_app_settings, Settings
 from app.src.core.repositories.media_repository import MediaRepository
 
+
 class AwsRepository:
     def __init__(self,
                  service
                  ) -> None:
-        settings = get_app_settings()
+        self.settings = get_app_settings()
         self.media_repository = MediaRepository()
-        self.client = client(service, region_name=settings.REGION)
-        self.media_bucket = settings.MEDIA_BUCKET
+        self.client = client(service, region_name=self.settings.REGION)
+        self.media_bucket = self.settings.MEDIA_BUCKET
 
 
 class S3Repository(AwsRepository):
     def __init__(self):
         super().__init__('s3')
 
-    def get_media_stream(self, media_code: str) -> Tuple[str, bytes]:
+    def get_media_stream(self, media_code: str) -> Tuple[str, bytes, Any]:
         key = self.media_repository.get_media_name(media_code)
         if not key:
             raise BaseAppException(
@@ -32,5 +33,12 @@ class S3Repository(AwsRepository):
             )
 
         s3_response = self.client.get_object(Bucket=self.media_bucket, Key=key)
-        return key, s3_response["Body"].read()
+        return key, s3_response["Body"].read(), s3_response['ContentType']
 
+    def is_media_uploaded(self, media_name: str) -> bool:
+        status = True
+        try:
+            self.client.head_object(Bucket=self.settings.MEDIA_BUCKET, Key=media_name)
+        except Exception as e:
+            status = False
+        return status

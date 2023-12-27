@@ -79,11 +79,11 @@ class MediaRepository(GenericDBRepository):
         return rows[0][0]
 
     def get_feedback(self, media_code: str) -> Any:
-        if self.has_uploaded(media_code):
+        if self.is_uploaded(media_code):
             return self.mongo_db.get_feedback(media_code)
 
     def get_transcription(self, media_code: str) -> Any:
-        if self.has_uploaded(media_code):
+        if self.is_uploaded(media_code):
             return self.mongo_db.get_transcription(media_code)
 
     def is_assigned_to(self, media_code: str, user_id: str) -> bool:
@@ -117,3 +117,10 @@ class MediaRepository(GenericDBRepository):
                 },
                 custom_error_code=CustomErrorCode.NOT_FOUND_ERROR
             )
+
+    @handle_db_exception
+    def is_uploaded(self, media_code: str) -> bool:
+        # query = select(Media.is_uploaded).where(Media.media_code==media_code)
+        # is_uploaded, = self.session.execute(query).fetchone()
+
+        return True  # TODO need to add logic to check if the upload happened or not

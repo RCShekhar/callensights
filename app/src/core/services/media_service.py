@@ -1,4 +1,5 @@
 import datetime
+import io
 import json
 from typing import Optional, List, Dict, Any
 from uuid import uuid4
@@ -129,19 +130,18 @@ class MediaService:
     def get_media_stream(self, media_code: str, user_id: str) -> StreamingResponse:
         self.media_repository.assume_media_assigned_to(media_code, user_id)
 
-        key, media_content = self.s3_repository.get_media_stream(media_code)
+        key, media_content, content_type = self.s3_repository.get_media_stream(media_code)
         if media_content is not None:
             return StreamingResponse(
-                iter([media_content]),
-                media_type="application/octet-stream",
-                headers={"Content-Disposition": f"attachment; filename={key}"}
+                io.BytesIO(media_content),
+                media_type=content_type
             )
 
     def get_feedback(self, media_code: str, user_id: str):
         self.media_repository.assume_media_assigned_to(media_code, user_id)
-        self.media_repository.get_feedback(media_code)
+        return self.media_repository.get_feedback(media_code)
 
     def get_transcription(self, media_code: str, user_id: str):
         self.media_repository.assume_media_assigned_to(media_code, user_id)
-        self.media_repository.get_transcription(media_code)
+        return self.media_repository.get_transcription(media_code)
 
