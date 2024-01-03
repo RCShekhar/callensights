@@ -137,11 +137,23 @@ class MediaService:
                 media_type=content_type
             )
 
-    def get_feedback(self, media_code: str, user_id: str):
+    def get_feedback(self, media_code: str, user_id: str) -> Any:
         self.media_repository.assume_media_assigned_to(media_code, user_id)
-        return self.media_repository.get_feedback(media_code)
+        if self.media_repository.is_feedback_generated(media_code):
+            return self.media_repository.get_feedback(media_code)
+        else:
+            return {
+                'media_code': media_code,
+                'status': 'Feedback generation is still under progress'
+            }
 
     def get_transcription(self, media_code: str, user_id: str):
         self.media_repository.assume_media_assigned_to(media_code, user_id)
-        return self.media_repository.get_transcription(media_code)
+        if self.media_repository.is_transcript_generated(media_code):
+            return self.media_repository.get_transcription(media_code)
+        else:
+            return {
+                'media_code': media_code,
+                'status': 'Transcription generation is still under process'
+            }
 

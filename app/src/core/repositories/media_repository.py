@@ -4,7 +4,7 @@ from sqlalchemy import Row, select
 from app.src.common.decorators.db_exception_handlers import handle_db_exception
 from app.src.common.enum.custom_error_code import CustomErrorCode
 from app.src.common.exceptions.application_exception import BaseAppException
-from app.src.core.models.db_models import Media, Lead, User
+from app.src.core.models.db_models import Media, Lead, User, MediaStatus
 from app.src.core.repositories.geniric_repository import GenericDBRepository
 from app.src.common.config.database import get_mongodb
 
@@ -124,3 +124,43 @@ class MediaRepository(GenericDBRepository):
         # is_uploaded, = self.session.execute(query).fetchone()
 
         return True  # TODO need to add logic to check if the upload happened or not
+
+    @handle_db_exception
+    def is_feedback_generated(self, media_code) -> bool:
+        return_value = False
+
+        query = select(
+            MediaStatus.fedbk_status_cd
+        ).join(
+            Media,
+            Media.id == MediaStatus.media_id
+        ).filter(
+            Media.media_code == media_code
+        )
+
+        row = self.session.execute(query).fetchone()
+        status, = row
+        if status in ['S', 'C']:
+            return_value = True
+
+        return return_value
+
+    @handle_db_exception
+    def is_transcript_generated(self, media_code) -> bool:
+        return_value = False
+
+        query = select(
+            MediaStatus.trans_status_cd
+        ).join(
+            Media,
+            Media.id == MediaStatus.media_id
+        ).filter(
+            Media.media_code == media_code
+        )
+
+        row = self.session.execute(query).fetchone()
+        status, = row
+        if status in ['S', 'C']:
+            return_value = True
+
+        return return_value

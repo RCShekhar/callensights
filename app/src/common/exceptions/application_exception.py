@@ -26,3 +26,4 @@ class BaseAppException(Exception):
             "data": self.data,
             "custom_error_code": self.custom_error_code
         }
+

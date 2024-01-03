@@ -25,6 +25,8 @@ class LeadService(BaseService):
         self.settings = settings
 
     def create_lead(self, model: BaseModel, user_id: str) -> Optional[Dict[str, Any]]:
+        self._assume_user_exists(user_id)
+
         dump = model.model_dump()
         dump['user_id'] = user_id
         lead = self.repository.add_lead(dump)
