@@ -93,13 +93,19 @@ async def assign_to(
     user_id = decoded_payload.get('user_id')
     response = lead_service.assign_to(lead_ids, user_id, target_user)
     return JSONResponse(content=response)
-# @lead_router.get(
-#     "/get-leads",
-#     summary="Get all available leads",
-#     response_model=GetLeadsResponse,
-#     response_model_by_alias=False
-# )
-# def get_loads(
-#         lead_service: LeadService = Depends()
-# ) -> JSONResponse:
-#     leads = lead_service.get_leads
+
+
+@lead_router.post(
+    "/add-comment",
+    summary="Add comment against lead",
+    response_model_by_alias=False
+)
+async def comment(
+        lead_id: int,
+        user_comment: str,
+        lead_service: LeadService = Depends(),
+        decoded_payload: DecodedPayload = Depends(JWTBearer())
+) -> JSONResponse:
+    user_id = decoded_payload.get('user_id')
+    response = lead_service.add_comment(lead_id, user_id, user_comment)
+    return JSONResponse(content=response)

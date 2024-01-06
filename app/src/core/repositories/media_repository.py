@@ -1,10 +1,11 @@
+from datetime import datetime
 from typing import Dict, Any, List, Optional
 
 from sqlalchemy import Row, select
 from app.src.common.decorators.db_exception_handlers import handle_db_exception
-from app.src.common.enum.custom_error_code import CustomErrorCode
-from app.src.common.exceptions.application_exception import BaseAppException
+from app.src.common.exceptions.exceptions import NotAssignedToUserException
 from app.src.core.models.db_models import Media, Lead, User, MediaStatus
+from app.src.core.repositories.user_repository import UserRepository
 from app.src.core.repositories.geniric_repository import GenericDBRepository
 from app.src.common.config.database import get_mongodb
 
@@ -15,19 +16,26 @@ class MediaRepository(GenericDBRepository):
     ):
         super().__init__(Media)
         self.mongo_db = get_mongodb()
+        self.user_repository = UserRepository()
 
     @handle_db_exception
-    def register_media(self, media_model: Dict[str, Any]) -> bool:
-        response = False
+    def register_media(self, media_model: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         clerk_id = media_model.get('user_id')
         # media_model['clerk_id'] = clerk_id
-        media_model['user_id'] = self.get_id_for_clerk(clerk_id)
+        media_model['user_id'] = self.user_repository.get_user_id(clerk_id)
         model = self.model(**media_model)
         self.session.add(model)
         self.session.commit()
-        response = True
+        activity = {
+            'done_by': self.user_repository.get_user_id(clerk_id),
+            'lead_id': media_model.get('lead_id'),
+            'activity_code': 'UPLOAD',
+            'activity_desc': 'Media uploaded',
+            'event_date': datetime.now(),
+            'stage_id': media_model.get('stage_id')
+        }
 
-        return response
+        return activity
 
     @handle_db_exception
     def get_id_for_clerk(self, clerk_id: str) -> int:
@@ -107,23 +115,23 @@ class MediaRepository(GenericDBRepository):
         return result
 
     def assume_media_assigned_to(self, media_code: str, user_id: str) -> None:
+        if self.user_repository.is_admin(user_id):
+            return
+
         if not self.is_assigned_to(media_code, user_id):
-            raise BaseAppException(
-                status_code=404,
-                description="The Media not assigned to user",
+            raise NotAssignedToUserException(
                 data={
                     'media_code': media_code,
                     'user_id': user_id
-                },
-                custom_error_code=CustomErrorCode.NOT_FOUND_ERROR
+                }
             )
 
     @handle_db_exception
     def is_uploaded(self, media_code: str) -> bool:
-        # query = select(Media.is_uploaded).where(Media.media_code==media_code)
-        # is_uploaded, = self.session.execute(query).fetchone()
+        query = select(Media.is_uploaded).where(Media.media_code == media_code)
+        status, = self.session.execute(query).fetchone()
 
-        return True  # TODO need to add logic to check if the upload happened or not
+        return status
 
     @handle_db_exception
     def is_feedback_generated(self, media_code) -> bool:

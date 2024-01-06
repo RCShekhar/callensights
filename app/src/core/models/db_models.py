@@ -174,3 +174,16 @@ class Metrics(Base):
 
     created_dt: Mapped[datetime] = mapped_column('md_created_dt', default=datetime.now())
     updated_dt: Mapped[datetime] = mapped_column('md_updated_dt')
+
+
+class Activity(Base):
+    __tablename__ = "cns_activity"
+
+    id: Mapped[int] = mapped_column("ca_activity_id", primary_key=True)
+    done_by: Mapped[int] = mapped_column("ca_done_by", ForeignKey('cns_user_def.cu_user_id'), nullable=False)
+    lead_id: Mapped[int] = mapped_column("ca_lead_id", ForeignKey("cns_lead_def.cl_lead_id"), nullable=True)
+    activity_code: Mapped[str] = mapped_column("ca_activity_code", nullable=False)
+    activity_desc: Mapped[str] = mapped_column("ca_activity_desc", nullable=True)
+    affected_user: Mapped[int] = mapped_column("ca_affected_user", ForeignKey('cns_user_def.cu_user_id'), nullable=True)
+    event_date: Mapped[datetime] = mapped_column("ca_event_date", default=datetime.now())
+    stage_id: Mapped[int] = mapped_column("ca_stage_id", ForeignKey("cns_lead_stage_def.ls_stage_id"), nullable=True)

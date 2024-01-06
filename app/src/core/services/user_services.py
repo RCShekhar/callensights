@@ -8,7 +8,7 @@ from app.src.common.exceptions.application_exception import BaseAppException
 from app.src.core.schemas.responses.user_workspace_response import UserWorkspaceResponse, StageInfo, LeadPosition
 from app.src.core.services.base_service import BaseService
 from app.src.common.config.app_settings import get_app_settings, Settings
-from app.src.core.repositories.create_user_repository import UserRepository
+from app.src.core.repositories.user_repository import UserRepository
 from app.src.core.schemas.responses.create_user_response import CreateUserResponse
 from app.src.core.schemas.responses.create_user_group_response import CreateUserGroupResponse
 from app.src.core.schemas.requests.update_user_request import UpdateUserRequest

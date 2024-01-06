@@ -37,7 +37,6 @@ async def upload_media(
     response_model_by_alias=False
 )
 async def get_uploads(
-        # user_id: str,
         service: MediaService = Depends(),
         decoaded_payload: DecodedPayload = Depends(JWTBearer())
 ) -> JSONResponse:

@@ -12,7 +12,7 @@ import boto3 as aws
 from app.src.common.exceptions.application_exception import BaseAppException
 from app.src.common.enum.custom_error_code import CustomErrorCode
 from app.src.core.repositories.media_repository import MediaRepository
-from app.src.core.repositories.create_user_repository import UserRepository
+from app.src.core.repositories.user_repository import UserRepository
 from app.src.core.repositories.lead_repository import LeadRepository
 from app.src.core.schemas.requests.upload_request import UploadMediaInputsModel
 from app.src.common.config.app_settings import get_app_settings, Settings
@@ -66,7 +66,7 @@ class MediaService:
                     data={'user_id': request_dump.get('user_id'), 'traceback': format_exc()}
                 )
 
-            self.media_repository.register_media(request_dump)
+            activity = self.media_repository.register_media(request_dump)
 
             file_response['file'] = file
             file_response['media_code'] = media_code
@@ -93,6 +93,7 @@ class MediaService:
                 file_response['message'] = str(e)
 
             response.append(MediaResponse.model_validate(file_response))
+            self.media_repository.record_activity(activity)
 
         return response
 
