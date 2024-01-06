@@ -8,7 +8,7 @@ from sqlalchemy import insert
 from app.src.common.config.app_settings import get_app_settings, Settings
 from app.src.common.enum.custom_error_code import CustomErrorCode
 from app.src.common.exceptions.application_exception import BaseAppException
-from app.src.common.exceptions.exceptions import NoUserFoundException, NotAssignedToUserException
+from app.src.common.exceptions.exceptions import NoUserFoundException, NotAssignedToUserException, NoLeadFoundException
 from app.src.core.repositories.user_repository import UserRepository
 from app.src.core.repositories.lead_repository import LeadRepository
 from app.src.core.schemas.responses.create_lead_response import CreateLeadResponseModel
@@ -109,7 +109,7 @@ class LeadService(BaseService):
 
     def _assume_lead_exists(self, lead_id: int) -> None:
         if not self.repository.is_lead_exists(lead_id):
-            raise NoUserFoundException(
+            raise NoLeadFoundException(
                 data={"lead_id": lead_id}
             )
 

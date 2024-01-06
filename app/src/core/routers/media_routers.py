@@ -48,7 +48,6 @@ async def get_uploads(
 @media_router.get(
     "/get-media",
     summary="Stream media bytes",
-    # response_model=StreamingResponse,
     response_model_by_alias=False
 )
 async def get_media(

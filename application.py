@@ -61,4 +61,4 @@ async def home(bearer: JWTBearer = Depends()):
 
 
 if __name__ == "__main__":
-    uvicorn.run(application, host="0.0.0.0", port=8081)
+    uvicorn.run(application, host="0.0.0.0", port=8000)

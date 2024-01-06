@@ -5,7 +5,7 @@ from app.src.common.exceptions.application_exception import BaseAppException
 
 
 class NoUserFoundException(BaseAppException):
-    def __int__(
+    def __init__(
             self,
             data: Optional[Dict[str, Any]] = None
     ):
@@ -41,7 +41,7 @@ class NoLeadFoundException(BaseAppException):
 
 
 class NotAssignedToUserException(BaseAppException):
-    def __int__(
+    def __init__(
             self,
             data: Optional[Dict[str, Any]] = None
     ):

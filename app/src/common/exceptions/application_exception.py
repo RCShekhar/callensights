@@ -1,3 +1,4 @@
+from json import dumps
 from typing import Union, Dict, Any
 from collections import defaultdict
 
@@ -16,7 +17,7 @@ class BaseAppException(Exception):
         self.status_code = status_code
         self.description = description
         self.data = defaultdict(str, data) if data is not None else defaultdict(str)
-        self.custom_error_code = custom_error_code
+        self.custom_error_code = custom_error_code.value
 
     def to_dict(self) -> Dict[str, Any]:
         return {

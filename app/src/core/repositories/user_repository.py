@@ -75,5 +75,5 @@ class UserRepository(GenericDBRepository):
     @handle_db_exception
     def get_user_id(self, clerk_id: str) -> int:
         query = select(User.id).where(User.clerk_id == clerk_id)
-        uid = self.session.execute(query).fetchone()
+        uid, = self.session.execute(query).fetchone()
         return uid
