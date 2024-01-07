@@ -56,16 +56,6 @@ class LeadRepository(GenericDBRepository):
         return lead_type
 
     @handle_db_exception
-    def is_lead_exists(self, lead_id: int) -> Optional[bool]:
-        result = False
-        response = self.session.query(self.model).filter_by(id=lead_id).first()
-
-        if response:
-            result = True
-
-        return result
-
-    @handle_db_exception
     def get_stages(self) -> List[Dict[str, Any]]:
         stmt = select(
             LeadStages.id.label("stage_id"),
@@ -93,19 +83,6 @@ class LeadRepository(GenericDBRepository):
         leads_cursor = self.session.execute(stmt)
         leads = [lead._asdict() for lead in leads_cursor.fetchall()]
         return leads
-
-    @handle_db_exception
-    def is_assigned_to(self, lead_id: int, user_id: str) -> bool:
-        stmt = select(
-            Lead.id
-        ).join(
-            User, User.id == Lead.assigned_to
-        ).where(User.clerk_id == user_id and Lead.id == lead_id)
-
-        cursor = self.session.execute(stmt)
-        if cursor.first() is None:
-            return False
-        return True
 
     @handle_db_exception
     def get_lead_info(self, lead_id: int) -> Dict[str, Any]:
@@ -160,7 +137,7 @@ class LeadRepository(GenericDBRepository):
         )
 
     @handle_db_exception
-    def update_stage(self, lead_id: int, stage_id: int, user_id:str) -> Optional[Dict[str, Any]]:
+    def update_stage(self, lead_id: int, stage_id: int, user_id: str) -> Optional[Dict[str, Any]]:
         stmt = update(Lead).where(Lead.id == lead_id).values({'stage_id': stage_id})
         self.session.execute(stmt)
         self.session.commit()
@@ -201,4 +178,3 @@ class LeadRepository(GenericDBRepository):
             'event_date': datetime.now(),
         }
         return activity
-

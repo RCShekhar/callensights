@@ -38,14 +38,6 @@ class UserRepository(GenericDBRepository):
         return user_group
 
     @handle_db_exception
-    def is_user_exists(self, user_id: str) -> bool:
-        result: bool = False
-        response = self.session.query(User).filter_by(clerk_id=user_id)
-        if response:
-            result = True
-        return result
-
-    @handle_db_exception
     def get_team(self, user_id: str) -> List[Any]:
         cte = select(User.id, User.clerk_id).where(User.clerk_id == user_id).cte(recursive=True)
         cte = cte.union_all(
@@ -65,15 +57,3 @@ class UserRepository(GenericDBRepository):
         cte = delete(User).where(User.clerk_id == user_id)
         self.session.execute(cte)
         self.session.commit()
-
-    @handle_db_exception
-    def is_admin(self, user_id: str) -> bool:
-        query = select(User.role).where(User.clerk_id == user_id)
-        role, = self.session.execute(query)
-        return role == 'ADMIN'
-
-    @handle_db_exception
-    def get_user_id(self, clerk_id: str) -> int:
-        query = select(User.id).where(User.clerk_id == clerk_id)
-        uid, = self.session.execute(query).fetchone()
-        return uid
