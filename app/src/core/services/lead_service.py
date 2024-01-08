@@ -9,7 +9,7 @@ from app.src.core.repositories.user_repository import UserRepository
 from app.src.core.repositories.lead_repository import LeadRepository
 from app.src.core.schemas.responses.create_lead_response import CreateLeadResponseModel
 from app.src.core.schemas.responses.create_lead_type_response import CreateLeadTypeResponseModel
-from app.src.core.schemas.responses.lead_info_response import LeadInfoResponse
+from app.src.core.schemas.responses.lead_info_response import LeadInfoResponse, LeadConversation
 from app.src.core.services.base_service import BaseService
 
 

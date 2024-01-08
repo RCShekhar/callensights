@@ -187,3 +187,4 @@ class Activity(Base):
     affected_user: Mapped[int] = mapped_column("ca_affected_user", ForeignKey('cns_user_def.cu_user_id'), nullable=True)
     event_date: Mapped[datetime] = mapped_column("ca_activity_date", default=datetime.now())
     stage_id: Mapped[int] = mapped_column("ca_stage_id", ForeignKey("cns_lead_stage_def.ls_stage_id"), nullable=True)
+    media_code: Mapped[str] = mapped_column("ca_media_code", ForeignKey("cns_media_def.cm_media_code"), nullable=True)

@@ -20,7 +20,8 @@ async def app_exception_handler(request: Request, exc: BaseAppException) -> JSON
         content={
             "error_description": exc.description,
             "error_data": exc.data,
-            "error_code": exc.custom_error_code.value
+            "error_code": exc.custom_error_code if isinstance(exc.custom_error_code,
+                                                              str) else exc.custom_error_code.value
         },
     )
 
@@ -30,7 +31,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
     return JSONResponse(
         status_code=HTTPStatus.BAD_REQUEST,
-        content={'message': "FAILED", 'details':  exc.errors()}
+        content={'message': "FAILED", 'details': exc.errors()}
     )
 
 

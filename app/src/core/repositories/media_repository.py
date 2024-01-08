@@ -32,7 +32,8 @@ class MediaRepository(GenericDBRepository):
             'activity_code': 'UPLOAD',
             'activity_desc': 'Media uploaded',
             'event_date': datetime.now(),
-            'stage_id': media_model.get('stage_id')
+            'stage_id': media_model.get('stage_id'),
+            'media_code': media_model.get('media_code')
         }
 
         return activity
@@ -55,12 +56,18 @@ class MediaRepository(GenericDBRepository):
                 Media.file_type.label("media_type"),
                 Media.media_size.label("media_size"),
                 Media.media_len.label("media_length"),
+                User.clerk_id.label("user_id"),
+                User.first_name.label("user_name"),
+                Lead.id.label("lead_id"),
                 Lead.name.label("lead_name"),
                 Media.conv_type.label("conv_type")
             ).join(
                 Lead,
                 Lead.id == Media.lead_id,
                 isouter=True
+            ).join(
+                User,
+                User.id == Media.user_id
             )
         )
         if user_role.upper() != 'ADMIN':

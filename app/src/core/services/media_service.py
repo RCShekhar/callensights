@@ -98,28 +98,14 @@ class MediaService:
         return response
 
     def get_uploads(self, user_id: str) -> List[GetUploadsResponseModel]:
-
-        if not self.user_repository.is_user_exists(user_id):
-            raise BaseAppException(
-                status_code=401,
-                description=f"No user exists with user id {user_id}",
-                data={'user_id': user_id, 'traceback': format_exc()},
-                custom_error_code=CustomErrorCode.NOT_FOUND_ERROR
-            )
+        self.media_repository.assume_user_exists(user_id)
 
         records = self.media_repository.get_uploads(user_id)
-
         response = [GetUploadsResponseModel.model_validate(record._asdict()) for record in records]
         return response
 
     def get_all_uploads(self, user_id: str) -> List[GetUploadsResponseModel]:
-        if not self.user_repository.is_user_exists(user_id):
-            raise BaseAppException(
-                status_code=401,
-                description=f"No user exists with user id {user_id}",
-                data={'user_id': user_id, 'traceback': format_exc()},
-                custom_error_code=CustomErrorCode.NOT_FOUND_ERROR
-            )
+        self.media_repository.assume_user_exists(user_id)
 
         users = self.user_repository.get_team(user_id)
         response: List[GetUploadsResponseModel] = []

@@ -1,11 +1,10 @@
 from typing import Dict, Any, Type
 
-from gunicorn.config import User
 from sqlalchemy import select
 
 from app.src.common.config.database import Database
 from app.src.common.exceptions.exceptions import NoUserFoundException, NoLeadFoundException, NotAssignedToUserException
-from app.src.core.models.db_models import Base, Activity, Lead
+from app.src.core.models.db_models import Base, Activity, Lead, User
 from app.src.common.decorators.db_exception_handlers import handle_db_exception
 
 
@@ -34,6 +33,7 @@ class GenericDBRepository:
     @handle_db_exception
     def is_user_exists(self, user_id: str) -> bool:
         result: bool = False
+        # query = select(User).where(User.clerk_id==user_id)
         response = self.session.query(User).filter_by(clerk_id=user_id)
         if response:
             result = True

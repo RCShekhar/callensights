@@ -2,9 +2,10 @@ from datetime import datetime
 from typing import Optional, Dict, List, Any
 
 from sqlalchemy import select, update
+from sqlalchemy.orm import aliased
 
 from app.src.common.decorators.db_exception_handlers import handle_db_exception
-from app.src.core.models.db_models import LeadTypes, Lead, LeadStages, Media, User
+from app.src.core.models.db_models import LeadTypes, Lead, LeadStages, Media, User, Activity
 from app.src.core.repositories.geniric_repository import GenericDBRepository
 from app.src.core.repositories.user_repository import UserRepository
 
@@ -105,30 +106,65 @@ class LeadRepository(GenericDBRepository):
 
     @handle_db_exception
     def get_lead_conversations(self, lead_id: int, user_id: str) -> List[Dict[str, Any]]:
+        ActionedUser = aliased(User)
+        TargetedUser = aliased(User)
         stmt = (
             select(
-                Media.media_code.label("media_code"),
-                Media.event_date.label("event_date"),
-                Media.conv_type.label("call_type"),
+                ActionedUser.first_name.label("user_name"),
+                ActionedUser.clerk_id.label("user_id"),
+                Activity.event_date.label("event_date"),
+                Activity.activity_code.label("event_type"),
+                Activity.activity_desc.label("comment"),
                 Lead.name.label("lead_name"),
-                Lead.country.label("country"),
-                Lead.st_province.label("state")
+                Activity.affected_user.label("assigned_to"),
+                Activity.media_code.label("media_code"),
+                Media.conv_type.label("call_type"),
+                TargetedUser.clerk_id.label("assigned_to"),
+                Activity.stage_id.label("stage_id")
             ).join(
-                User,
-                User.id == Media.user_id
+                ActionedUser,
+                ActionedUser.id == Activity.done_by
             ).join(
                 Lead,
-                Lead.id == Media.lead_id
-            ).filter(
-                User.clerk_id == user_id
-            ).filter(
-                Media.lead_id == lead_id
-            ).order_by(Media.event_date.desc())
+                Lead.id == Activity.lead_id
+            ).join(
+                Media,
+                Media.media_code == Activity.media_code
+            ).join(
+                TargetedUser,
+                TargetedUser.id == Activity.affected_user,
+                isouter=True
+            )
         )
 
         result = self.session.execute(stmt).fetchall()
-        rows = [row._asdict() for row in result]
+        rows = [self._format_conversation(row._asdict()) for row in result]
         return rows
+
+    def _format_conversation(self, record: Dict[str, Any]) -> Dict[str, Any]:
+        event_type = record.get("event_type")
+        event_info = {'comment': record.get('comment')}
+        if event_type == 'CREATE':
+            event_info['created_by'] = record.get("user_id")
+        elif event_type == 'ASSIGNED':
+            event_info['assigned_to'] = record.get("assigned_to")
+        elif event_type == 'TRANSFER':
+            event_info['stage_id'] = record.get("stage_id")
+        elif event_type == 'UPLOAD':
+            event_info['media_code'] = record.get("media_code")
+            event_info['call_type'] = record.get("call_type")
+        elif event_type == 'COMMENT':
+            event_info['user_id'] = record.get("user_id")
+        else:
+            pass
+
+        return {
+            'user_name': record.get("user_name"),
+            'event_type': event_type,
+            'event_info': event_info,
+            'event_date': record.get("event_date"),
+            'lead_name': record.get("lead_name")
+        }
 
     @handle_db_exception
     def get_activity(self, lead_id: int) -> List[Dict[str, Any]]:
