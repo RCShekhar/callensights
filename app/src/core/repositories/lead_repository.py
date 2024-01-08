@@ -18,7 +18,7 @@ class LeadRepository(GenericDBRepository):
         self.user_repository = UserRepository()
 
     @handle_db_exception
-    def add_lead(self, lead_model: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    def add_lead(self, lead_model: Dict[str, Any]) -> Dict[str, Any]:
         dump = lead_model
         row = self.session.execute(
             select(LeadStages.id.label("stage_id")).where(LeadStages.code == dump['stage_code'])
@@ -30,23 +30,24 @@ class LeadRepository(GenericDBRepository):
         ).fetchone()
         dump.update(row._asdict())
         activity = {
-            'done_by': dump.pop('user_id'),
+            'done_by': self.get_user_id(dump.pop('user_id')),
             'stage_id': self._get_stage_id(dump.pop('stage_code')),
             'activity_code': 'CREATE',
-            'activity_description': "Lead Created",
+            'activity_desc': "Lead Created",
             'event_date': datetime.now(),
         }
         lead = Lead(**dump)
-        activity['lead_id'] = lead.id
+
         self.session.add(lead)
         self.session.commit()
+        activity['lead_id'] = lead.id
         self.record_activity(activity)
         return activity
 
     @handle_db_exception
     def _get_stage_id(self, stage_code: str) -> int:
         query = select(LeadStages.id).where(LeadStages.code == stage_code)
-        stage_id = self.session.execute(query).fetchone()
+        stage_id, = self.session.execute(query).fetchone()
         return stage_id
 
     @handle_db_exception

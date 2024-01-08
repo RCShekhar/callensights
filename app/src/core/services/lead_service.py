@@ -32,7 +32,7 @@ class LeadService(BaseService):
         lead = self.repository.add_lead(dump)
         return CreateLeadResponseModel.model_validate(
             {
-                'lead_id': lead.id
+                'lead_id': lead.get("lead_id")
             }
         ).model_dump()
 

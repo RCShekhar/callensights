@@ -19,5 +19,12 @@ def handle_db_exception(func: Callable) -> Callable:
                 custom_error_code=CustomErrorCode.DATABASE_ERROR,
                 data={'args': args, "kwargs": kwargs}
             )
+        except Exception as e:
+            raise BaseAppException(
+                status_code=500,
+                description=str(e),
+                custom_error_code=CustomErrorCode.UNKNOWN_ERROR,
+                data={'args': args, "kwargs": kwargs}
+            )
 
     return wrapper
