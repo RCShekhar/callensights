@@ -52,7 +52,7 @@ class LeadService(BaseService):
         self.repository.assume_lead_assigned_to(lead_id, user_id)
 
         data = self.repository.get_lead_info(lead_id)
-        data['conversations'] = self.repository.get_lead_conversations(lead_id, user_id)
+        data['conversations'] = self.repository.get_lead_conversations(lead_id)
 
         # data['conversations'] = [LeadConversation(**conversation) for conversation in data['conversations']]
         response = LeadInfoResponse(**data)

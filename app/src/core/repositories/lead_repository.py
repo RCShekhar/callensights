@@ -80,7 +80,10 @@ class LeadRepository(GenericDBRepository):
         ).join(
             User,
             User.id == Lead.assigned_to
-        ).where(User.clerk_id == user_id))
+        ))
+
+        if not self.is_admin(user_id):
+            stmt = stmt.where(User.clerk_id == user_id)
 
         leads_cursor = self.session.execute(stmt)
         leads = [lead._asdict() for lead in leads_cursor.fetchall()]
@@ -106,7 +109,7 @@ class LeadRepository(GenericDBRepository):
         return row._asdict()
 
     @handle_db_exception
-    def get_lead_conversations(self, lead_id: int, user_id: str) -> List[Dict[str, Any]]:
+    def get_lead_conversations(self, lead_id: int) -> List[Dict[str, Any]]:
         ActionedUser = aliased(User)
         TargetedUser = aliased(User)
         stmt = (
@@ -130,11 +133,14 @@ class LeadRepository(GenericDBRepository):
                 Lead.id == Activity.lead_id
             ).join(
                 Media,
-                Media.media_code == Activity.media_code
+                Media.media_code == Activity.media_code,
+                isouter=True
             ).join(
                 TargetedUser,
                 TargetedUser.id == Activity.affected_user,
                 isouter=True
+            ).where(
+                Lead.id == lead_id
             )
         )
 
@@ -166,12 +172,6 @@ class LeadRepository(GenericDBRepository):
             'event_date': record.get("event_date"),
             'lead_name': record.get("lead_name")
         }
-
-    @handle_db_exception
-    def get_activity(self, lead_id: int) -> List[Dict[str, Any]]:
-        stmt = (
-            select()
-        )
 
     @handle_db_exception
     def update_stage(self, lead_id: int, stage_id: int, user_id: str) -> Optional[Dict[str, Any]]:

@@ -76,13 +76,7 @@ class UserService(BaseService):
             user_id: str,
     ) -> UserWorkspaceResponse:
         lead_repo: LeadRepository = LeadRepository()
-        if not self.repository.is_user_exists(user_id):
-            raise BaseAppException(
-                status_code=404,
-                description="No Such User found",
-                data={"user_id": user_id},
-                custom_error_code=CustomErrorCode.NOT_FOUND_ERROR
-            )
+        self.repository.assume_user_exists(user_id)
 
         stages = lead_repo.get_stages()
         leads = lead_repo.get_assigned_leads(user_id)

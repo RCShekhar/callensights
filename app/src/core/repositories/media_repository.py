@@ -138,7 +138,7 @@ class MediaRepository(GenericDBRepository):
         query = select(Media.is_uploaded).where(Media.media_code == media_code)
         status, = self.session.execute(query).fetchone()
 
-        return status
+        return True #status
 
     @handle_db_exception
     def is_feedback_generated(self, media_code) -> bool:

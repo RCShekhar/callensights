@@ -62,7 +62,7 @@ class GenericDBRepository:
     @handle_db_exception
     def is_admin(self, user_id: str) -> bool:
         query = select(User.role).where(User.clerk_id == user_id)
-        role, = self.session.execute(query)
+        role, = self.session.execute(query).fetchone()
         return role == 'ADMIN'
 
     @handle_db_exception

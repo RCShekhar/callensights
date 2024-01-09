@@ -49,7 +49,6 @@ class MongoDB:
         password = self.secret_mgr.mongo_db_secret('password')
         host = self.secret_mgr.mongo_db_secret("host")
         mongo_url = f"mongodb+srv://{user_name}:{password}@{host}/?retryWrites=true&w=majority"
-        print(mongo_url)
         self.client = MongoClient(mongo_url)
         return self.client
 
