@@ -54,7 +54,8 @@ class GenericDBRepository:
     @handle_db_exception
     def is_lead_exists(self, lead_id: int) -> bool:
         result = False
-        response = self.session.query(self.model).filter_by(id=lead_id).first()
+        query = select(Lead.id).where(Lead.id == lead_id)
+        response, = self.session.execute(query).fetchone()
         if response:
             result = True
         return result
