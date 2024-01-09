@@ -61,7 +61,7 @@ class MongoDB:
             collection = db[collection_name]
             return collection.insert_one(feedback)
 
-    def get_transcription(self, media_code: str, collection_name:str="transcriptions") -> Dict[str, Any]:
+    def get_transcription(self, media_code: str, collection_name: str = "transcriptions") -> Dict[str, Any]:
         """
         Get transcription data from the MongoDB.
         """
@@ -82,7 +82,7 @@ class MongoDB:
             collection = db[collection_name]
             return collection.insert_one(transcription)
 
-    def get_feedback(self, media_code: str, collection_name="feedbacks") -> str:
+    def get_feedback(self, media_code: str, collection_name="feedbacks") -> Dict[str, Any]:
         """
         Get Feedback data from the MongoDB.
         """

@@ -93,7 +93,7 @@ class MediaRepository(GenericDBRepository):
 
         return rows[0][0]
 
-    def get_feedback(self, media_code: str) -> Any:
+    def get_feedback(self, media_code: str) -> Dict[str, Any]:
         if self.is_uploaded(media_code):
             return self.mongo_db.get_feedback(media_code)
 
