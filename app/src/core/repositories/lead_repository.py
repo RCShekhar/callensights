@@ -76,7 +76,9 @@ class LeadRepository(GenericDBRepository):
         stmt = (select(
             Lead.id.label("lead_id"),
             Lead.name.label("lead_name"),
-            Lead.stage_id.label("stage_id")
+            Lead.stage_id.label("stage_id"),
+            User.clerk_id.label("assigned_to"),
+            User.user_name.label("user_name")
         ).join(
             User,
             User.id == Lead.assigned_to

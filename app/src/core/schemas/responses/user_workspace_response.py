@@ -12,6 +12,8 @@ class LeadPosition(BaseModel):
     lead_id: int
     lead_name: str
     stage_id: int
+    assigned_to: str
+    user_name: str
 
 
 class UserWorkspaceResponse(BaseModel):

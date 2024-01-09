@@ -1,43 +1,13 @@
 from pydantic import BaseModel, field_validator
 
 from datetime import datetime
-from typing import List, Optional, Any, Union
-
-
-# {created_by: user_id} {assigned_to: user_id} {stage: stage_code}
-#             { media_code:, call_type: , user_id: }
-#             {user_id:, comment:}
-
-class CreateData(BaseModel):
-    user_id: str
-    comment: str
-
-
-class AssignedData(BaseModel):
-    assigned_to: str
-    comment: str
-
-
-class TransferData(BaseModel):
-    stage_id: str
-    comment: str
-
-
-class UploadData(BaseModel):
-    media_code: str
-    call_type: str
-    comment: str
-
-
-class CommentData(BaseModel):
-    user_id: str
-    comment: str
+from typing import List, Optional, Any, Union, Dict
 
 
 class LeadConversation(BaseModel):
     user_name: str
     event_type: str
-    event_info: Union[CreateData, AssignedData, TransferData, UploadData, CommentData]
+    event_info: Optional[Dict[str, Any]]
     event_date: datetime
     lead_name: str
 
