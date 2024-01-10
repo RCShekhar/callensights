@@ -70,7 +70,7 @@ async def get_feedback(
         decoaded_payload: DecodedPayload = Depends(JWTBearer())
 ) -> JSONResponse:
     user_id = decoaded_payload.get('user_id')
-    return media_service.get_feedback(media_code, user_id)
+    return JSONResponse(**media_service.get_feedback(media_code, user_id))
 
 
 @media_router.get(
@@ -84,4 +84,4 @@ async def get_transcript(
         decoaded_payload: DecodedPayload = Depends(JWTBearer())
 ) -> JSONResponse:
     user_id = decoaded_payload.get('user_id')
-    return JSONResponse(content=media_service.get_transcription(media_code, user_id))
+    return JSONResponse(**media_service.get_transcription(media_code, user_id))

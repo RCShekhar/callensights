@@ -122,7 +122,6 @@ class LeadRepository(GenericDBRepository):
                 Activity.activity_code.label("event_type"),
                 Activity.activity_desc.label("comment"),
                 Lead.name.label("lead_name"),
-                Activity.affected_user.label("assigned_to"),
                 Activity.media_code.label("media_code"),
                 Media.conv_type.label("call_type"),
                 TargetedUser.clerk_id.label("assigned_to"),
