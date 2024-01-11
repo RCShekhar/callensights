@@ -7,6 +7,6 @@ class CreateLeadRequestModel(BaseModel):
     email: str
     phone: str
     stage_code: Optional[str] = None
-    country: Optional[str]
-    st_province: Optional[str]
+    country: Optional[str] = None
+    st_province: Optional[str] = None
     lead_type_code: str
