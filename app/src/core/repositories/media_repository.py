@@ -71,12 +71,12 @@ class MediaRepository(GenericDBRepository):
             )
         )
         if user_role.upper() != 'ADMIN':
-            query = query.join(
-                User,
-                User.id == Media.user_id
-            ).filter(
+            query = query.filter(
                 User.clerk_id == user_id
             )
+
+        print("Get Uploads query:", query)
+        print("user_id", user_id)
 
         records = self.session.execute(query).all()
 
