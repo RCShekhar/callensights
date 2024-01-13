@@ -1,3 +1,4 @@
+import os
 from functools import lru_cache
 from typing import Optional
 
@@ -5,30 +6,29 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    # TODO Add settings here
 
     # AWS Config
-    MONGODB_SECRET: str
-    MYSQLDB_SECRET: str
-    CLERK_SECRET: str
-    CLERK_AUDIENCE: str
-    REGION: str
+    MONGODB_SECRET: str = os.environ['MONGODB_SECRET']
+    MYSQLDB_SECRET: str = os.environ['MYSQLDB_SECRET']
+    CLERK_SECRET: str = os.environ['CLERK_SECRET']
+    CLERK_AUDIENCE: str = os.environ['CLERK_AUDIENCE']
+    REGION: str = os.environ['REGION']
 
     # Database Configuration
-    DEFAULT_SCHEMA: str
+    DEFAULT_SCHEMA: str = os.environ['DEFAULT_SCHEMA']
 
     # AWS Buckets
-    MEDIA_BUCKET: str
-    TRANSCRIPT_BUCKET: str
-    ANALYSIS_BUCKET: str
+    MEDIA_BUCKET: str = os.environ['MEDIA_BUCKET']
+    TRANSCRIPT_BUCKET: str = os.environ['TRANSCRIPT_BUCKET']
+    ANALYSIS_BUCKET: str = os.environ['ANALYSIS_BUCKET']
 
     # Application configuration
-    MEDIA_MIN_SIZE: int
-    MEDIA_MAX_SIZE: int
-    IS_LOCAL: bool
+    MEDIA_MIN_SIZE: int = os.environ['MEDIA_MIN_SIZE']
+    MEDIA_MAX_SIZE: int = os.environ['MEDIA_MAX_SIZE']
+    IS_LOCAL: Optional[bool] = os.environ.get('IS_LOCAL', False)
 
-    class Config:
-        env_file = ".env"
+    # class Config:
+    #     env_file = ".env"
 
 
 @lru_cache()
