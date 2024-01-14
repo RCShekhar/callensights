@@ -1,3 +1,4 @@
 provider "aws" {
-  region = "ap-south-1"
+  region = var.region
+  shared_credentials_files = ["~/.aws/credentials"]
 }
