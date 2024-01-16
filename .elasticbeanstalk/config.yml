@@ -1,0 +1,19 @@
+branch-defaults:
+  dev:
+    environment: Cns-vertocity-api-app-env
+environment-defaults:
+  Cns-vertocity-api-app-env:
+    branch: null
+    repository: null
+global:
+  application_name: cns-vertocity-api-app
+  default_ec2_keyname: cns-vertocity-key-pair
+  default_platform: Python 3.11 running on 64bit Amazon Linux 2023
+  default_region: ap-south-1
+  include_git_submodules: true
+  instance_profile: null
+  platform_name: null
+  platform_version: null
+  profile: null
+  sc: git
+  workspace_type: Application
