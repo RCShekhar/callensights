@@ -4,21 +4,28 @@ phases:
   install:
     runtime-versions:
       python: 3.11
+
   pre_build:
     commands:
-      - pyenv global 3.11.4
       - pip install -r requirements.txt
+
   build:
     commands:
       - echo "Build started on `date`"
       - echo "Running tests..."
       - python -m pytest
       - echo "Build completed on `date`"
+
   post_build:
     commands:
       - echo "Post-build started on `date`"
-      - zip -r application.zip app/ .ebextensions/${ENV}.config
+      - zip -r application.zip app/ .ebextensions/
       - echo "Post-build completed on `date`"
 
 artifacts:
   files: application.zip
+
+cache:
+  paths:
+    - '/root/.cache/pip'
+
