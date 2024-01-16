@@ -6,6 +6,7 @@ phases:
       python: 3.11
   pre_build:
     commands:
+      - pyenv global 3.11.4
       - pip install -r requirements.txt
   build:
     commands:
