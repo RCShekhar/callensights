@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional, Dict, List, Any
 
 from sqlalchemy import select, update
+from sqlalchemy.sql.functions import coalesce
 from sqlalchemy.orm import aliased
 
 from app.src.common.decorators.db_exception_handlers import handle_db_exception
@@ -87,7 +88,8 @@ class LeadRepository(GenericDBRepository):
             Lead.stage_id.label("stage_id"),
             User.clerk_id.label("assigned_to"),
             User.user_name.label("user_name"),
-            User.updated_dt.label("updated_dt"),
+            Lead.updated_dt.label("updated_dt"),
+            coalesce(Lead.updated_dt, Lead.created_dt).label("modified_dt"),
         ).join(User, User.id == Lead.assigned_to)
 
         if not self.is_admin(user_id):
