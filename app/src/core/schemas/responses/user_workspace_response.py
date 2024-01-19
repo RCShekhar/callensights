@@ -1,6 +1,7 @@
 from typing import Optional, List, Any
 
 from pydantic import BaseModel
+from datetime import datetime
 
 
 class StageInfo(BaseModel):
@@ -14,6 +15,7 @@ class LeadPosition(BaseModel):
     stage_id: int
     assigned_to: str
     user_name: str
+    updated_dt: datetime
 
 
 class UserWorkspaceResponse(BaseModel):
