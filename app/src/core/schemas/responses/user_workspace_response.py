@@ -1,6 +1,7 @@
-from typing import Optional, List, Any
+from typing import Optional, List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
+from datetime import datetime
 
 
 class StageInfo(BaseModel):
@@ -14,6 +15,7 @@ class LeadPosition(BaseModel):
     stage_id: int
     assigned_to: str
     user_name: str
+    modified_dt: datetime
 
 
 class UserWorkspaceResponse(BaseModel):
