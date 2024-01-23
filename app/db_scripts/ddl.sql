@@ -1,56 +1,56 @@
-CREATE SCHEMA callensights;
+-- CREATE SCHEMA callensights;
 
-CREATE  TABLE callensights.cns_application_config ( 
+CREATE  TABLE callensights.cns_application_config (
 	ac_config_id         INT    NOT NULL AUTO_INCREMENT  PRIMARY KEY,
 	ac_config_key        VARCHAR(50)    NOT NULL   ,
 	cns_config_value     VARCHAR(100)       ,
 	ac_config_desc       VARCHAR(200)       ,
 	ac_created_dt        DATETIME  DEFAULT (now())     ,
 	ac_update_dt         DATETIME       ,
-	CONSTRAINT unq_cns_application_config UNIQUE ( ac_config_key ) 
+	CONSTRAINT unq_cns_application_config UNIQUE ( ac_config_key )
  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE  TABLE callensights.cns_lead_stage_def ( 
+CREATE  TABLE callensights.cns_lead_stage_def (
 	ls_stage_id          INT    NOT NULL AUTO_INCREMENT  PRIMARY KEY,
 	ls_stage_code        VARCHAR(20)   CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL   ,
 	ls_stage_desc        VARCHAR(512)   CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci    ,
 	ls_is_active         BOOLEAN  DEFAULT ('1')     ,
 	ls_created_dt        DATETIME  DEFAULT (CURRENT_TIMESTAMP)     ,
 	ls_modified_dt       DATETIME  DEFAULT (CURRENT_TIMESTAMP)     ,
-	CONSTRAINT unq_cns_call_types_def UNIQUE ( ls_stage_code ) 
+	CONSTRAINT unq_cns_call_types_def UNIQUE ( ls_stage_code )
  ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE  TABLE callensights.cns_lead_types_def ( 
+CREATE  TABLE callensights.cns_lead_types_def (
 	lt_type_id           INT    NOT NULL AUTO_INCREMENT  PRIMARY KEY,
 	lt_type_desc         VARCHAR(256)       ,
 	lt_created_dt        DATETIME  DEFAULT (now())  NOT NULL   ,
 	lt_type_code         VARCHAR(10)    NOT NULL   ,
-	CONSTRAINT unq_cns_lead_types_def UNIQUE ( lt_type_code ) 
+	CONSTRAINT unq_cns_lead_types_def UNIQUE ( lt_type_code )
  ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE  TABLE callensights.cns_metrics_def ( 
+CREATE  TABLE callensights.cns_metrics_def (
 	md_metric_id         INT    NOT NULL AUTO_INCREMENT  PRIMARY KEY,
 	md_metric_title      VARCHAR(50)       ,
 	md_metric_prompt     VARCHAR(512)       ,
 	md_metric_created_dt DATETIME  DEFAULT (now())     ,
-	md_metric_updated_dt DATETIME   ON UPDATE CURRENT_TIMESTAMP    
+	md_metric_updated_dt DATETIME   ON UPDATE CURRENT_TIMESTAMP
  ) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE  TABLE callensights.cns_user_group ( 
+CREATE  TABLE callensights.cns_user_group (
 	ug_group_id          INT    NOT NULL AUTO_INCREMENT  PRIMARY KEY,
 	ug_group_name        VARCHAR(20)    NOT NULL   ,
 	ug_group_desc        VARCHAR(200)       ,
 	ug_created_dt        DATETIME  DEFAULT (now())     ,
 	ug_end_dt            DATETIME       ,
-	CONSTRAINT `cns_user_group_UN` UNIQUE ( ug_group_name ) 
+	CONSTRAINT `cns_user_group_UN` UNIQUE ( ug_group_name )
  ) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE  TABLE callensights.cns_group_message ( 
+CREATE  TABLE callensights.cns_group_message (
 	gm_msg_id            INT    NOT NULL AUTO_INCREMENT  PRIMARY KEY,
 	gm_group_id          INT    NOT NULL   ,
 	gm_msg_order         INT       ,
 	gm_message           MEDIUMTEXT       ,
-	gm_msg_status        CHAR(1)  DEFAULT ('_utf8mb4'Y'')  NOT NULL   ,
+	gm_msg_status        CHAR(1)  DEFAULT ('Y')  NOT NULL   ,
 	gm_created_dt        DATETIME  DEFAULT (now())     ,
 	gm_end_dt            DATETIME       ,
 	CONSTRAINT fk_cns_group_message FOREIGN KEY ( gm_group_id ) REFERENCES callensights.cns_user_group( ug_group_id ) ON DELETE NO ACTION ON UPDATE NO ACTION
@@ -58,13 +58,13 @@ CREATE  TABLE callensights.cns_group_message (
 
 CREATE INDEX fk_cns_group_message ON callensights.cns_group_message ( gm_group_id );
 
-CREATE  TABLE callensights.cns_lead_call_metrics ( 
+CREATE  TABLE callensights.cns_lead_call_metrics (
 	lcm_id               INT    NOT NULL AUTO_INCREMENT  PRIMARY KEY,
 	lcm_lead_type_id     INT       ,
 	lcm_call_type_id     INT       ,
 	lcm_metrics_id       INT       ,
 	lcm_created_dt       DATETIME  DEFAULT (now())     ,
-	lcm_key_metric       CHAR(1)  DEFAULT ('_utf8mb4'N'')     ,
+	lcm_key_metric       CHAR(1)  DEFAULT ('N')     ,
 	CONSTRAINT fk_cns_lead_call_metrics FOREIGN KEY ( lcm_lead_type_id ) REFERENCES callensights.cns_lead_types_def( lt_type_id ) ON DELETE NO ACTION ON UPDATE NO ACTION,
 	CONSTRAINT fk_cns_lead_call_metrics_call_type FOREIGN KEY ( lcm_call_type_id ) REFERENCES callensights.cns_lead_stage_def( ls_stage_id ) ON DELETE NO ACTION ON UPDATE NO ACTION,
 	CONSTRAINT fk_cns_lead_call_metrics_metric FOREIGN KEY ( lcm_metrics_id ) REFERENCES callensights.cns_metrics_def( md_metric_id ) ON DELETE NO ACTION ON UPDATE NO ACTION
@@ -76,7 +76,7 @@ CREATE INDEX fk_cns_lead_call_metrics_call_type ON callensights.cns_lead_call_me
 
 CREATE INDEX fk_cns_lead_call_metrics_metric ON callensights.cns_lead_call_metrics ( lcm_metrics_id );
 
-CREATE  TABLE callensights.cns_user_def ( 
+CREATE  TABLE callensights.cns_user_def (
 	cu_user_id           INT    NOT NULL AUTO_INCREMENT  PRIMARY KEY,
 	cu_clerk_user_id     VARCHAR(100)       ,
 	cu_user_name         VARCHAR(45)       ,
@@ -101,7 +101,7 @@ CREATE INDEX fk_cns_user_def_cns_user_group ON callensights.cns_user_def ( cu_us
 
 CREATE INDEX `cns_user_def_FK` ON callensights.cns_user_def ( cu_manager_id );
 
-CREATE  TABLE callensights.cns_lead_def ( 
+CREATE  TABLE callensights.cns_lead_def (
 	cl_lead_id           INT    NOT NULL AUTO_INCREMENT  PRIMARY KEY,
 	cl_lead_name         VARCHAR(100)       ,
 	cl_email             VARCHAR(128)       ,
@@ -126,7 +126,7 @@ CREATE INDEX `cns_lead_def_FK` ON callensights.cns_lead_def ( cl_stage_id );
 
 CREATE INDEX `cns_lead_def_FK_1` ON callensights.cns_lead_def ( cl_assigned_to );
 
-CREATE  TABLE callensights.cns_media_def ( 
+CREATE  TABLE callensights.cns_media_def (
 	cm_media_id          INT    NOT NULL AUTO_INCREMENT  PRIMARY KEY,
 	cm_media_code        VARCHAR(100)   CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci    ,
 	cm_user_id           INT    NOT NULL   ,
@@ -153,13 +153,13 @@ CREATE INDEX fk_cns_media_def_cns_user_def ON callensights.cns_media_def ( cm_us
 
 CREATE INDEX fk_cns_media_def_cns_lead_def ON callensights.cns_media_def ( cm_lead_id );
 
-CREATE  TABLE callensights.cns_media_status ( 
+CREATE  TABLE callensights.cns_media_status (
 	ms_status_id         INT    NOT NULL AUTO_INCREMENT  PRIMARY KEY,
 	ms_media_id          INT    NOT NULL   ,
-	ms_trans_status_cd   CHAR(1)  DEFAULT ('_utf8mb4'N'')     ,
+	ms_trans_status_cd   CHAR(1)  DEFAULT ('N')     ,
 	ms_trans_start_dt    DATETIME       ,
 	ms_trans_end_dt      DATETIME       ,
-	ms_fedbk_status_cd   CHAR(1)  DEFAULT ('_utf8mb4'N'')     ,
+	ms_fedbk_status_cd   CHAR(1)  DEFAULT ('N')     ,
 	ms_fedbk_start_dt    DATETIME       ,
 	ms_fedbk_end_dt      DATETIME       ,
 	ms_comments          VARCHAR(200)       ,
@@ -168,7 +168,7 @@ CREATE  TABLE callensights.cns_media_status (
 	CONSTRAINT fk_cns_media_status FOREIGN KEY ( ms_media_id ) REFERENCES callensights.cns_media_def( cm_media_id ) ON DELETE NO ACTION ON UPDATE NO ACTION
  ) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE  TABLE callensights.cns_activity ( 
+CREATE  TABLE callensights.cns_activity (
 	ca_activity_id       INT    NOT NULL AUTO_INCREMENT  PRIMARY KEY,
 	ca_lead_id           INT    NOT NULL   ,
 	ca_done_by           INT       ,
@@ -192,7 +192,7 @@ CREATE INDEX `cns_activity_FK_1` ON callensights.cns_activity ( ca_affected_user
 
 CREATE INDEX `cns_activity_FK_2` ON callensights.cns_activity ( ca_stage_id );
 
-CREATE  TABLE callensights.cns_colab_def ( 
+CREATE  TABLE callensights.cns_colab_def (
 	co_colab_id          INT    NOT NULL AUTO_INCREMENT  PRIMARY KEY,
 	co_lead_id           INT    NOT NULL   ,
 	co_user_id           INT    NOT NULL   ,
@@ -206,12 +206,14 @@ CREATE INDEX fk_cns_colab_def_cns_lead_def ON callensights.cns_colab_def ( co_le
 
 CREATE VIEW callensights.metrics_view AS select `cmd2`.`cm_media_code` AS `media_code`,`cltd`.`lt_type_desc` AS `lead_type_desc`,`clsd`.`ls_stage_desc` AS `stage_desc`,`cld`.`cl_lead_name` AS `lead_name`,`cmd`.`md_metric_prompt` AS `metric_prompt`,`clcm`.`lcm_key_metric` AS `key_metric_flag` from (((((`callensights`.`cns_lead_call_metrics` `clcm` join `callensights`.`cns_metrics_def` `cmd` on((`cmd`.`md_metric_id` = `clcm`.`lcm_metrics_id`))) join `callensights`.`cns_lead_types_def` `cltd` on((`clcm`.`lcm_lead_type_id` = `cltd`.`lt_type_id`))) join `callensights`.`cns_lead_stage_def` `clsd` on((`clsd`.`ls_stage_id` = `clcm`.`lcm_call_type_id`))) join `callensights`.`cns_lead_def` `cld` on((`cld`.`cl_stage_id` = `clsd`.`ls_stage_id`))) join `callensights`.`cns_media_def` `cmd2` on((`cmd2`.`cm_lead_id` = `cld`.`cl_lead_id`)));
 
-CREATE TRIGGER callensights.trg_media_status AFTER INSERT ON cns_media_def FOR EACH ROW BEGIN 
+
+CREATE TRIGGER callensights.trg_media_status AFTER INSERT ON cns_media_def FOR EACH ROW BEGIN
 	INSERT INTO cns_media_status (ms_media_id)
 	VALUES(NEW.cm_media_id);
-END;
+END; //
 
-CREATE TRIGGER callensights.trg_status_update BEFORE UPDATE ON cns_media_status FOR EACH ROW BEGIN 
+
+CREATE TRIGGER callensights.trg_status_update BEFORE UPDATE ON cns_media_status FOR EACH ROW BEGIN
     IF NEW.ms_trans_status_cd = 'R' THEN
         SET NEW.ms_trans_start_dt = CURRENT_TIMESTAMP();
     ELSEIF NEW.ms_trans_status_cd IN ('C', 'S', 'E') THEN
@@ -222,7 +224,7 @@ CREATE TRIGGER callensights.trg_status_update BEFORE UPDATE ON cns_media_status 
     ELSEIF NEW.ms_fedbk_status_cd IN ('C', 'S', 'E') THEN
         SET NEW.ms_fedbk_end_dt = CURRENT_TIMESTAMP();
     END IF;
-END;
+END; //
 
 ALTER TABLE callensights.cns_application_config COMMENT 'Aplication configurations';
 
@@ -260,7 +262,7 @@ ALTER TABLE callensights.cns_group_message MODIFY gm_msg_order INT     COMMENT '
 
 ALTER TABLE callensights.cns_group_message MODIFY gm_message MEDIUMTEXT     COMMENT 'the message';
 
-ALTER TABLE callensights.cns_group_message MODIFY gm_msg_status CHAR(1)  NOT NULL DEFAULT ('_utf8mb4'Y'')  COMMENT 'Y - Active, N-Inactive';
+ALTER TABLE callensights.cns_group_message MODIFY gm_msg_status CHAR(1)  NOT NULL DEFAULT ('Y')  COMMENT 'Y - Active, N-Inactive';
 
 ALTER TABLE callensights.cns_group_message MODIFY gm_created_dt DATETIME   DEFAULT (now())  COMMENT 'timestamp when created';
 
@@ -340,13 +342,13 @@ ALTER TABLE callensights.cns_media_status COMMENT 'Process status of media';
 
 ALTER TABLE callensights.cns_media_status MODIFY ms_media_id INT  NOT NULL   COMMENT 'Media id refer to media def table';
 
-ALTER TABLE callensights.cns_media_status MODIFY ms_trans_status_cd CHAR(1)   DEFAULT ('_utf8mb4'N'')  COMMENT 'Status code of transcription generation N-New, R-Running, S-Success, E-Error';
+ALTER TABLE callensights.cns_media_status MODIFY ms_trans_status_cd CHAR(1)   DEFAULT ('N')  COMMENT 'Status code of transcription generation N-New, R-Running, S-Success, E-Error';
 
 ALTER TABLE callensights.cns_media_status MODIFY ms_trans_start_dt DATETIME     COMMENT 'date time when transcription process started';
 
 ALTER TABLE callensights.cns_media_status MODIFY ms_trans_end_dt DATETIME     COMMENT 'Date time when transcription process ended';
 
-ALTER TABLE callensights.cns_media_status MODIFY ms_fedbk_status_cd CHAR(1)   DEFAULT ('_utf8mb4'N'')  COMMENT 'Status code of feedback generation N-New, R-Running, S-Success, E-Error';
+ALTER TABLE callensights.cns_media_status MODIFY ms_fedbk_status_cd CHAR(1)   DEFAULT ('N')  COMMENT 'Status code of feedback generation N-New, R-Running, S-Success, E-Error';
 
 ALTER TABLE callensights.cns_media_status MODIFY ms_fedbk_start_dt DATETIME     COMMENT 'date time when feedback process started';
 
