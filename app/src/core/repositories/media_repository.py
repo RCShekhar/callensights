@@ -56,6 +56,7 @@ class MediaRepository(GenericDBRepository):
                 Media.file_type.label("media_type"),
                 Media.media_size.label("media_size"),
                 Media.media_len.label("media_length"),
+                Media.event_date.label("created_date"),
                 User.clerk_id.label("user_id"),
                 User.first_name.label("user_name"),
                 Lead.id.label("lead_id"),

@@ -4,6 +4,11 @@ from datetime import datetime
 from typing import List, Optional, Any, Union, Dict
 
 
+class AssignedUser(BaseModel):
+    user_id: Optional[str] = None
+    user_name: Optional[str] = None
+
+
 class LeadConversation(BaseModel):
     user_name: str
     event_type: str
@@ -24,7 +29,7 @@ class LeadConversation(BaseModel):
 class LeadInfoResponse(BaseModel):
     lead_id: int
     lead_name: str
-    assigned_clerk_id: Optional[str]
+    assigned_to: Optional[AssignedUser] = None
     country: Optional[str]
     state: Optional[str]
     email: str

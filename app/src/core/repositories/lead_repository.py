@@ -111,6 +111,7 @@ class LeadRepository(GenericDBRepository):
                 Lead.st_province.label("state"),
                 Lead.lead_desc.label("description"),
                 User.clerk_id.label("assigned_clerk_id"),
+                User.user_name("assinged_user_name")
             )
             .join(User, User.id == Lead.assigned_to)
             .where(Lead.id == lead_id)
