@@ -113,7 +113,7 @@ class LeadService(BaseService):
         self.repository.assume_lead_assigned_to(lead_id, user_id)
 
         activity = {
-            'done_by': self.user_repository.get_user_id(user_id),
+            'done_by': self.user_repository.get_internal_user_id(user_id),
             'lead_id': lead_id,
             'activity_code': 'COMMENT',
             'activity_desc': user_comment,

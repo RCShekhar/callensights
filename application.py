@@ -19,6 +19,7 @@ from app.src.common.exceptions.exception_handlers import (
     general_exception_handler,
     validation_exception_handler,
 )
+from app.src.core.routers.dashboard_routers import dashboard_router
 from app.src.core.routers.media_routers import media_router
 from app.src.core.routers.users_routers import user_router
 from app.src.core.routers.lead_routers import lead_router
@@ -51,6 +52,7 @@ application.add_exception_handler(Exception, general_exception_handler)
 application.include_router(media_router, prefix="/media")
 application.include_router(user_router, prefix="/user")
 application.include_router(lead_router, prefix="/lead")
+application.include_router(dashboard_router, prefix="/dashboard")
 
 
 @application.get("/", dependencies=[Depends(JWTBearer())], tags=["Home"])

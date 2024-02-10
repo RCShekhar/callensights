@@ -22,12 +22,12 @@ class MediaRepository(GenericDBRepository):
     def register_media(self, media_model: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         clerk_id = media_model.get('user_id')
         # media_model['clerk_id'] = clerk_id
-        media_model['user_id'] = self.user_repository.get_user_id(clerk_id)
+        media_model['user_id'] = self.user_repository.get_internal_user_id(clerk_id)
         model = self.model(**media_model)
         self.session.add(model)
         self.session.commit()
         activity = {
-            'done_by': self.user_repository.get_user_id(clerk_id),
+            'done_by': self.user_repository.get_internal_user_id(clerk_id),
             'lead_id': media_model.get('lead_id'),
             'activity_code': 'UPLOAD',
             'activity_desc': 'Media uploaded',

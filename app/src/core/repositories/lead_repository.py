@@ -40,7 +40,7 @@ class LeadRepository(GenericDBRepository):
         ).fetchone()
         dump.update(row._asdict())
         activity = {
-            "done_by": self.get_user_id(dump.pop("user_id")),
+            "done_by": self.get_internal_user_id(dump.pop("user_id")),
             "stage_id": self._get_stage_id(dump.pop("stage_code")),
             "activity_code": "CREATE",
             "activity_desc": "Lead Created",
@@ -181,7 +181,7 @@ class LeadRepository(GenericDBRepository):
         self.session.execute(stmt)
         self.session.commit()
         activity = {
-            "done_by": self.user_repository.get_user_id(user_id),
+            "done_by": self.user_repository.get_internal_user_id(user_id),
             "lead_id": lead_id,
             "activity_code": "TRANSFER",
             "activity_desc": "Stage updated",
@@ -209,7 +209,7 @@ class LeadRepository(GenericDBRepository):
         self.session.execute(query)
         self.session.commit()
         activity = {
-            "done_by": self.user_repository.get_user_id(user_id),
+            "done_by": self.user_repository.get_internal_user_id(user_id),
             "lead_id": lead_id,
             "activity_code": "ASSIGNED",
             "activity_desc": "Lead assigned to user",
