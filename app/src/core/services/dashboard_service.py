@@ -48,7 +48,7 @@ class DashboardService(BaseService):
                 else:
                     individual_scores[key] = rating
 
-        response['Overall Score'] = sum(list(individual_scores.values()))
+        response['OVERALL_SCORE'] = sum(list(individual_scores.values()))
         response.update(individual_scores)
         result = [
             {
