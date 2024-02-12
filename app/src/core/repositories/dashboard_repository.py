@@ -1,3 +1,7 @@
+import calendar
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
 from typing import Any, Dict, List, Optional
 
 from sqlalchemy import select, func
@@ -46,34 +50,44 @@ class DashboardRepository(GenericDBRepository):
         metrics = feedback.get('metrics')
         return metrics
 
+
     @handle_db_exception
     def get_monthly_uploads(self, user_id) -> List[Dict[str, int]]:
-        query = select(
-            func.concat(
-                func.extract('year', Media.event_date),
-                '-',
-                func.extract('month', Media.event_date)
-            ).label('month'),
-            func.count('*').label('calls_uploaded')
+        query = self.session.query(
+            func.extract('month', Media.event_date).label('month'),
+            func.count(Media.id).label('calls_uploaded')
         )
 
         if not self.is_admin(user_id):
-            query.filter(Media.user_id == self.get_internal_user_id(user_id))
+            query = query.filter(Media.user_id == self.get_internal_user_id(user_id))
 
-        query.group_by(
-            func.extract('year', Media.event_date),
-            func.extract('month', Media.event_date)
-        )
+        # Filter by event_date (last 12 months)
+        one_year_ago = datetime.now() - relativedelta(years=1)
+        query = query.filter(Media.event_date >= one_year_ago)
 
-        rs = self.session.execute(query).fetchall()
-        return [r._asdict() for r in rs]
+        # Group by month
+        query = query.group_by('month')
+
+        rs = query.all()
+
+        results = {calendar.month_name[r.month]: r.calls_uploaded for r in rs}
+
+        # Ensure all months are present in the result
+        for i in range(1, 13):
+            month = calendar.month_name[i]
+            if month not in results:
+                results[month] = 0
+
+        return results
 
     def get_recent_calls(self, user_id) -> List[Dict[str, Any]]:
         query = select(
             Media.media_code.label('media_code'),
             Lead.name.label("lead_name"),
+            Lead.id.label("lead_id"),
             User.clerk_id.label("user_id"),
             User.user_name.label("user_name"),
+            Lead.stage_id.label("stage_id"),
             Media.event_date.label("created_dt")
         ).join(
             Lead,

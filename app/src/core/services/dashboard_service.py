@@ -26,9 +26,17 @@ class DashboardService(BaseService):
         upload_count = len(uploads)
         total_media_length = sum([media.get('media_length', 0.0) for media in uploads])
         response = {
-            'Total calls uploaded': upload_count,
-            'Average Call Duration': total_media_length if total_media_length == 0.0 else total_media_length / upload_count,
-            'Overall Score': 0.0
+            "TOTAL_CALLS_UPLOADED": upload_count,
+            "AVERAGE_CALL_DURATION": (
+                total_media_length
+                if total_media_length == 0.0
+                else total_media_length / upload_count
+            ),
+            "OVERALL_SCORE": 0.0,
+            # -1 here indicates that there's Insufficient Data available
+            "FLUENCY_RATE": -1,
+            "GROWTH_RATE": -1,
+            "SATISFACTION_RATE": -1
         }
 
         individual_scores = {}
@@ -44,7 +52,7 @@ class DashboardService(BaseService):
                 else:
                     individual_scores[key] = rating
 
-        response['Overall Score'] = sum(list(individual_scores.values()))
+        response['OVERALL_SCORE'] = sum(list(individual_scores.values()))
         response.update(individual_scores)
         result = [
             {
@@ -58,8 +66,8 @@ class DashboardService(BaseService):
         self.repository.assume_user_exists(user_id)
         uploads = self.repository.get_monthly_uploads(user_id)
 
-        return [MonthlyUploadsModel.model_validate(data).model_dump() for data in uploads]
-
+        return [MonthlyUploadsModel.model_validate({"month": month, "calls_uploaded": calls_uploaded}).model_dump() for month, calls_uploaded in uploads.items()]
+    
     def get_recent_calls(self, user_id: str) -> List[Dict[str, Any]]:
         self.repository.assume_user_exists(user_id)
         recent_calls = self.repository.get_recent_calls(user_id)
