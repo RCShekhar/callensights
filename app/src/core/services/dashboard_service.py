@@ -33,6 +33,10 @@ class DashboardService(BaseService):
                 else total_media_length / upload_count
             ),
             "OVERALL_SCORE": 0.0,
+            # -1 here indicates that there's Insufficient Data available
+            "FLUENCY_RATE": -1,
+            "GROWTH_RATE": -1,
+            "SATISFACTION_RATE": -1
         }
 
         individual_scores = {}
@@ -62,8 +66,8 @@ class DashboardService(BaseService):
         self.repository.assume_user_exists(user_id)
         uploads = self.repository.get_monthly_uploads(user_id)
 
-        return [MonthlyUploadsModel.model_validate(data).model_dump() for data in uploads]
-
+        return [MonthlyUploadsModel.model_validate({"month": month, "calls_uploaded": calls_uploaded}).model_dump() for month, calls_uploaded in uploads.items()]
+    
     def get_recent_calls(self, user_id: str) -> List[Dict[str, Any]]:
         self.repository.assume_user_exists(user_id)
         recent_calls = self.repository.get_recent_calls(user_id)
