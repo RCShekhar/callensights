@@ -26,9 +26,13 @@ class DashboardService(BaseService):
         upload_count = len(uploads)
         total_media_length = sum([media.get('media_length', 0.0) for media in uploads])
         response = {
-            'Total calls uploaded': upload_count,
-            'Average Call Duration': total_media_length if total_media_length == 0.0 else total_media_length / upload_count,
-            'Overall Score': 0.0
+            "TOTAL_CALLS_UPLOADED": upload_count,
+            "AVERAGE_CALL_DURATION": (
+                total_media_length
+                if total_media_length == 0.0
+                else total_media_length / upload_count
+            ),
+            "OVERALL_SCORE": 0.0,
         }
 
         individual_scores = {}
