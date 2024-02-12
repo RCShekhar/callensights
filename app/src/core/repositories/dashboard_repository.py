@@ -86,6 +86,7 @@ class DashboardRepository(GenericDBRepository):
             Lead.name.label("lead_name"),
             User.clerk_id.label("user_id"),
             User.user_name.label("user_name"),
+            Lead.stage_id.label("stage_id"),
             Media.event_date.label("created_dt")
         ).join(
             Lead,

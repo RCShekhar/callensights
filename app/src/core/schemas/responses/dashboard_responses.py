@@ -19,6 +19,7 @@ class MonthlyUploadsModel(BaseModel):
 class RecentCallsModel(BaseModel):
     media_code: str
     lead_name: str
+    stage_id: int
     assigned_to: AssignedUser
     created_dt: datetime
 
