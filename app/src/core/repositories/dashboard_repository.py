@@ -84,6 +84,7 @@ class DashboardRepository(GenericDBRepository):
         query = select(
             Media.media_code.label('media_code'),
             Lead.name.label("lead_name"),
+            Lead.id.label("lead_id"),
             User.clerk_id.label("user_id"),
             User.user_name.label("user_name"),
             Lead.stage_id.label("stage_id"),
