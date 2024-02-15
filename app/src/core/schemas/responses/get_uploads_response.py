@@ -1,7 +1,7 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 
 class GetUploadsResponseModel(BaseModel):
@@ -15,6 +15,10 @@ class GetUploadsResponseModel(BaseModel):
     lead_id: int
     lead_name: str
     conv_type: str
+
+    @field_validator("created_date")
+    def validate_event_date(cls, value) -> Any:
+        return value.isoformat()
 
     class Config:
         json_encoders = {

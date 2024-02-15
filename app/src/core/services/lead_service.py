@@ -53,13 +53,13 @@ class LeadService(BaseService):
 
         data = self.repository.get_lead_info(lead_id)
         data['assigned_to'] = {
-            'assigned_clerk_id': data.pop('assigned_clerk_id'),
-            'assinged_user_id': data.pop('assinged_user_id')
+            'user_id': data.pop('assigned_clerk_id'),
+            'user_name': data.pop('assigned_user_name')
         }
         data['conversations'] = self.repository.get_lead_conversations(lead_id)
 
         # data['conversations'] = [LeadConversation(**conversation) for conversation in data['conversations']]
-        response = LeadInfoResponse(**data)
+        response = LeadInfoResponse.model_validate(data)
         return response
 
     def update_stage(self, lead_id: int, user_id: str, stage_id: int) -> Optional[str]:
