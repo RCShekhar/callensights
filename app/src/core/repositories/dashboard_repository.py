@@ -29,7 +29,7 @@ class DashboardRepository(GenericDBRepository):
             Media.media_size.label("media_size")
         ).join(
             User,
-            User.clerk_id == Media.user_id
+            User.id == Media.user_id
         )
         if not self.is_admin(user_id):
             query = query.filter(User.clerk_id == user_id)
@@ -41,7 +41,7 @@ class DashboardRepository(GenericDBRepository):
     def get_media_metrics(self, media_code: str) -> Optional[Dict[str, Any]]:
         response = {'media_code': media_code}
         if not self.media_repository.is_feedback_generated(media_code):
-            return response
+            return None
 
         feedback = self.mongodb.get_feedback(media_code)
         if not feedback:

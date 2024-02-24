@@ -42,6 +42,8 @@ class DashboardService(BaseService):
         media_codes = [media["media_code"] for media in uploads]
         for media_code in media_codes:
             metrics = self.repository.get_media_metrics(media_code)
+            if not metrics:
+                continue
             for metric in metrics:
                 key = metric.get("metric_name")
                 rating = float(metric.get("rating"))
