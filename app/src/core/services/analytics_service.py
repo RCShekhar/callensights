@@ -175,7 +175,7 @@ class AnalyticsService(BaseService):
                 calls_data.append(
                     (
                         {
-                            "media_code": upload[1],
+                            "media_code": upload[0],
                             "lead": {
                                 "lead_id": upload[7],
                                 "lead_name": upload[8],
