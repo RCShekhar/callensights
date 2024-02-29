@@ -2,7 +2,7 @@ import calendar
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Sequence
 
 from sqlalchemy import select, func
 
@@ -29,7 +29,7 @@ class DashboardRepository(GenericDBRepository):
             Media.media_size.label("media_size")
         ).join(
             User,
-            User.clerk_id == Media.user_id
+            User.id == Media.user_id
         )
         if not self.is_admin(user_id):
             query = query.filter(User.clerk_id == user_id)
@@ -41,7 +41,7 @@ class DashboardRepository(GenericDBRepository):
     def get_media_metrics(self, media_code: str) -> Optional[Dict[str, Any]]:
         response = {'media_code': media_code}
         if not self.media_repository.is_feedback_generated(media_code):
-            return response
+            return None
 
         feedback = self.mongodb.get_feedback(media_code)
         if not feedback:
@@ -50,9 +50,8 @@ class DashboardRepository(GenericDBRepository):
         metrics = feedback.get('metrics')
         return metrics
 
-
     @handle_db_exception
-    def get_monthly_uploads(self, user_id) -> List[Dict[str, int]]:
+    def get_monthly_uploads(self, user_id) -> dict[str | Sequence[str], Any]:
         query = self.session.query(
             func.extract('month', Media.event_date).label('month'),
             func.count(Media.id).label('calls_uploaded')
@@ -102,4 +101,3 @@ class DashboardRepository(GenericDBRepository):
 
         result = self.session.execute(query).fetchmany(5)
         return [row._asdict() for row in result]
-

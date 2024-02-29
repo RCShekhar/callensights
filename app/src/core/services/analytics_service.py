@@ -1,5 +1,4 @@
 import heapq
-import json
 import re
 from typing import Dict, Any
 from fastapi import Depends
@@ -14,8 +13,12 @@ from app.src.core.schemas.responses.analytics_response import (
     OptimalFrailCallsModel,
 )
 from app.src.core.services.base_service import BaseService
+from cachetools import cached, TTLCache
 
 Metric = namedtuple("Metric", ["name", "rating"])
+
+fn_cache = TTLCache(maxsize=100, ttl=1800)
+uploads_cache = TTLCache(maxsize=100, ttl=600)
 
 
 class AnalyticsService(BaseService):
@@ -67,6 +70,14 @@ class AnalyticsService(BaseService):
             self.cache_timestamp = datetime.now()
         return self.feedback_cache
 
+    @cached(uploads_cache)
+    def get_uploads(self, user_id: str):
+        """
+        Returns the uploads for a user. The results are cached for 10 minutes.
+        """
+        return self.media_repository.get_uploads(user_id)
+
+    @cached(fn_cache)
     def get_customer_satisfaction_score(self, user_id: str) -> dict[str, Any]:
         """
         Calculates the Customer Satisfaction (CSAT) score for a user. It fetches the user's uploads and feedbacks,
@@ -74,7 +85,7 @@ class AnalyticsService(BaseService):
         average rating.
         """
         self.analytics_repository.assume_user_exists(user_id)
-        user_uploaded_media = self.media_repository.get_uploads(user_id)
+        user_uploaded_media = self.get_uploads(user_id)
         user_feedbacks = self.feedbacks
 
         feedbacks_by_media_code = self.get_feedbacks_by_media_code(user_feedbacks)
@@ -93,9 +104,32 @@ class AnalyticsService(BaseService):
         return CsatScoreModel.model_validate(
             {
                 "averages": [data for data in records["averages"]],
-                "overall_average": records["overall_average"],
             }
         ).model_dump()
+
+    @cached(fn_cache)
+    def get_overall_score(self, user_id: str) -> float:
+        """
+        Calculates the Customer Satisfaction (CSAT) score for a user. It fetches the user's uploads and feedbacks,
+        calculates the average rating for each feedback, and returns the average ratings per day and the overall
+        average rating.
+        """
+        self.analytics_repository.assume_user_exists(user_id)
+        user_uploaded_media = self.get_uploads(user_id)
+        user_feedbacks = self.feedbacks
+
+        feedbacks_by_media_code = self.get_feedbacks_by_media_code(user_feedbacks)
+
+        overall_score = []
+        for upload in user_uploaded_media:
+            matching_feedback = feedbacks_by_media_code.get(upload[0])
+            if matching_feedback:
+                feedback_item = matching_feedback
+                metrics = feedback_item["feedback"]["metrics"]
+                average_rating = self.calculate_average_rating(metrics)
+                overall_score.append(average_rating)
+
+        return round(sum(overall_score) / len(overall_score), 2)
 
     @staticmethod
     def process_feedback_records(user_feedbacks):
@@ -109,7 +143,6 @@ class AnalyticsService(BaseService):
             ).date()
             date_ratings[date]["sum"] += feedback["average_rating"]
             date_ratings[date]["count"] += 1
-
         averages = [
             {
                 "date": date.isoformat(),
@@ -118,20 +151,18 @@ class AnalyticsService(BaseService):
             for date, values in date_ratings.items()
         ]
         averages.sort(key=lambda x: x["date"])
-        overall_average = (
-            sum([data["average_rating"] for data in averages]) / len(averages)
-            if averages
-            else 0
-        )
-        return {"averages": averages, "overall_average": round(overall_average, 2)}
+        return {
+            "averages": averages,
+        }
 
+    @cached(fn_cache)
     def get_optimal_and_frail_calls(self, user_id: str) -> Dict[str, Any]:
         """
         Finds the top 3 calls with the highest ratings (optimal calls) and the top 3 calls with the lowest ratings (
         frail calls).
         """
         self.analytics_repository.assume_user_exists(user_id)
-        user_uploaded_media = self.media_repository.get_uploads(user_id)
+        user_uploaded_media = self.get_uploads(user_id)
         user_feedbacks = self.feedbacks
         calls_data = []
         feedbacks_by_media_code = self.get_feedbacks_by_media_code(user_feedbacks)
@@ -141,12 +172,22 @@ class AnalyticsService(BaseService):
                 feedback_item = matching_feedback
                 metrics = feedback_item["feedback"]["metrics"]
                 average_rating = self.calculate_average_rating(metrics)
-                calls_data.append(({"media_code": upload[0], "rating": average_rating}))
+                calls_data.append(
+                    (
+                        {
+                            "media_code": upload[1],
+                            "lead": {
+                                "lead_id": upload[7],
+                                "lead_name": upload[8],
+                                "lead_at": upload[9],
+                            },
+                            "rating": average_rating,
+                        }
+                    )
+                )
 
         if len(calls_data) < 3:
             return {"optimal_calls": [], "frail_calls": []}
-
-        print(json.dumps(calls_data, indent=4))
 
         optimal_calls = heapq.nlargest(3, calls_data, key=lambda x: x["rating"])
         frail_calls = heapq.nsmallest(3, calls_data, key=lambda x: x["rating"])
@@ -158,12 +199,13 @@ class AnalyticsService(BaseService):
             }
         ).model_dump()
 
+    @cached(fn_cache)
     def get_call_rating_metrics(self, user_id: str) -> list[dict[str, Any]]:
         """
         Calculates the average rating for each metric across all calls for a given user.
         """
         self.analytics_repository.assume_user_exists(user_id)
-        uploaded_media = self.media_repository.get_uploads(user_id)
+        uploaded_media = self.get_uploads(user_id)
         user_feedbacks = self.feedbacks
 
         feedbacks_by_media_code = self.get_feedbacks_by_media_code(user_feedbacks)

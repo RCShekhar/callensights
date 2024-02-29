@@ -1,3 +1,5 @@
+import time
+import logging
 from typing import List
 
 from fastapi import APIRouter, Depends
@@ -13,6 +15,8 @@ from app.src.core.services.analytics_service import AnalyticsService
 
 analytics_router = APIRouter(tags=["Analytics"])
 
+logger = logging.getLogger(__name__)
+
 
 @analytics_router.get(
     "/csat-scores",
@@ -21,11 +25,14 @@ analytics_router = APIRouter(tags=["Analytics"])
     response_model_by_alias=False,
 )
 async def csat_score(
-        decoded_payload: DecodedPayload = Depends(JWTBearer()),
-        analytics_service: AnalyticsService = Depends(),
+    decoded_payload: DecodedPayload = Depends(JWTBearer()),
+    analytics_service: AnalyticsService = Depends(),
 ) -> JSONResponse:
     user_id = decoded_payload.get("user_id")
+    start_time = time.time()
     response = analytics_service.get_customer_satisfaction_score(user_id)
+    end_time = time.time()
+    print(f"get_customer_satisfaction_score took {end_time - start_time} seconds")
     return JSONResponse(content=response)
 
 
@@ -36,8 +43,8 @@ async def csat_score(
     response_model_by_alias=False,
 )
 async def csat_score(
-        decoded_payload: DecodedPayload = Depends(JWTBearer()),
-        analytics_service: AnalyticsService = Depends(),
+    decoded_payload: DecodedPayload = Depends(JWTBearer()),
+    analytics_service: AnalyticsService = Depends(),
 ) -> JSONResponse:
     user_id = decoded_payload.get("user_id")
     response = analytics_service.get_optimal_and_frail_calls(user_id)
@@ -51,8 +58,8 @@ async def csat_score(
     response_model_by_alias=False,
 )
 async def csat_score(
-        decoded_payload: DecodedPayload = Depends(JWTBearer()),
-        analytics_service: AnalyticsService = Depends(),
+    decoded_payload: DecodedPayload = Depends(JWTBearer()),
+    analytics_service: AnalyticsService = Depends(),
 ) -> JSONResponse:
     user_id = decoded_payload.get("user_id")
     response = analytics_service.get_call_rating_metrics(user_id)
