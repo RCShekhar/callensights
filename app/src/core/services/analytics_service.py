@@ -187,7 +187,6 @@ class AnalyticsService(BaseService):
             or 0.0 for media in uploads
             if media[3] is not None
         ]
-        print(total_media)
         return total_media
 
     @cached(fn_cache)

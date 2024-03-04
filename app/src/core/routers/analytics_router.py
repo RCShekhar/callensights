@@ -63,12 +63,12 @@ async def call_rating_metrics(
 
 
 @analytics_router.get(
-    "/avg-call-duration",
+    "/average-call-duration",
     summary="Call Rating Metrics",
     response_model=List[CallRatingMetricsModel],
     response_model_by_alias=False,
 )
-async def avg_call_duration(
+async def average_call_duration(
         decoded_payload: DecodedPayload = Depends(JWTBearer()),
         analytics_service: AnalyticsService = Depends(),
 ) -> JSONResponse:
