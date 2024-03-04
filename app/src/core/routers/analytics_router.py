@@ -1,4 +1,3 @@
-import time
 import logging
 from typing import List
 
@@ -8,7 +7,7 @@ from starlette.responses import JSONResponse
 from app.src.common.security.authorization import DecodedPayload, JWTBearer
 from app.src.core.schemas.responses.analytics_response import (
     CallRatingMetricsModel,
-    CsatScoreModel,
+    CustomerSatisfactionScoreListModel,
     OptimalFrailCallsModel,
 )
 from app.src.core.services.analytics_service import AnalyticsService
@@ -21,18 +20,15 @@ logger = logging.getLogger(__name__)
 @analytics_router.get(
     "/csat-scores",
     summary="Average metric score",
-    response_model=List[CsatScoreModel],
+    response_model=CustomerSatisfactionScoreListModel,
     response_model_by_alias=False,
 )
 async def csat_score(
-    decoded_payload: DecodedPayload = Depends(JWTBearer()),
-    analytics_service: AnalyticsService = Depends(),
+        decoded_payload: DecodedPayload = Depends(JWTBearer()),
+        analytics_service: AnalyticsService = Depends(),
 ) -> JSONResponse:
     user_id = decoded_payload.get("user_id")
-    start_time = time.time()
     response = analytics_service.get_customer_satisfaction_score(user_id)
-    end_time = time.time()
-    print(f"get_customer_satisfaction_score took {end_time - start_time} seconds")
     return JSONResponse(content=response)
 
 
@@ -42,9 +38,9 @@ async def csat_score(
     response_model=List[OptimalFrailCallsModel],
     response_model_by_alias=False,
 )
-async def csat_score(
-    decoded_payload: DecodedPayload = Depends(JWTBearer()),
-    analytics_service: AnalyticsService = Depends(),
+async def optimal_and_frail_calls(
+        decoded_payload: DecodedPayload = Depends(JWTBearer()),
+        analytics_service: AnalyticsService = Depends(),
 ) -> JSONResponse:
     user_id = decoded_payload.get("user_id")
     response = analytics_service.get_optimal_and_frail_calls(user_id)
@@ -57,10 +53,25 @@ async def csat_score(
     response_model=List[CallRatingMetricsModel],
     response_model_by_alias=False,
 )
-async def csat_score(
-    decoded_payload: DecodedPayload = Depends(JWTBearer()),
-    analytics_service: AnalyticsService = Depends(),
+async def call_rating_metrics(
+        decoded_payload: DecodedPayload = Depends(JWTBearer()),
+        analytics_service: AnalyticsService = Depends(),
 ) -> JSONResponse:
     user_id = decoded_payload.get("user_id")
     response = analytics_service.get_call_rating_metrics(user_id)
+    return JSONResponse(content=response)
+
+
+@analytics_router.get(
+    "/avg-call-duration",
+    summary="Call Rating Metrics",
+    response_model=List[CallRatingMetricsModel],
+    response_model_by_alias=False,
+)
+async def avg_call_duration(
+        decoded_payload: DecodedPayload = Depends(JWTBearer()),
+        analytics_service: AnalyticsService = Depends(),
+) -> JSONResponse:
+    user_id = decoded_payload.get("user_id")
+    response = analytics_service.average_call_duration(user_id)
     return JSONResponse(content=response)

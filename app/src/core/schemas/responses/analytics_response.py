@@ -24,10 +24,35 @@ class Calls(BaseModel):
 
 
 class OptimalFrailCallsModel(BaseModel):
-    optimal_calls: List[Calls]
     frail_calls: List[Calls]
+    optimal_calls: List[Calls]
 
 
 class CallRatingMetricsModel(BaseModel):
     metric: str
     average_rating: float
+
+
+class User(BaseModel):
+    user_id: str
+    username: str
+
+
+class Lead(BaseModel):
+    lead_id: int
+    lead_name: str
+    lead_at: str
+
+
+class CustomerSatisfactionScoreModel(BaseModel):
+    timestamp: str
+    media_code: str
+    user: User
+    lead: Lead
+    average_rating: float
+
+
+class CustomerSatisfactionScoreListModel(BaseModel):
+    averages: List[CustomerSatisfactionScoreModel]
+
+

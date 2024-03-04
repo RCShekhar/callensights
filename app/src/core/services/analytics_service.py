@@ -9,8 +9,9 @@ from app.src.core.repositories.analytics_repository import AnalyticsRepository
 from app.src.core.repositories.media_repository import MediaRepository
 from app.src.core.schemas.responses.analytics_response import (
     CallRatingMetricsModel,
-    CsatScoreModel,
     OptimalFrailCallsModel,
+    CustomerSatisfactionScoreModel,
+    CustomerSatisfactionScoreListModel,
 )
 from app.src.core.services.base_service import BaseService
 from cachetools import cached, TTLCache
@@ -90,21 +91,29 @@ class AnalyticsService(BaseService):
 
         feedbacks_by_media_code = self.get_feedbacks_by_media_code(user_feedbacks)
 
-        customer_satisfaction_scores = []
+        customer_satisfaction_scores: CustomerSatisfactionScoreModel = []
         for upload in user_uploaded_media:
             matching_feedback = feedbacks_by_media_code.get(upload[0])
             if matching_feedback:
                 feedback_item = matching_feedback
                 metrics = feedback_item["feedback"]["metrics"]
                 average_rating = self.calculate_average_rating(metrics)
-                customer_satisfaction_scores.append(
-                    self.construct_customer_satisfaction_score(upload, average_rating)
-                )
-        records = self.process_feedback_records(customer_satisfaction_scores)
-        return CsatScoreModel.model_validate(
-            {
-                "averages": [data for data in records["averages"]],
-            }
+                if upload[6]:
+                    customer_satisfaction_scores.append(
+                        {
+                            "timestamp": upload[4].strftime("%Y-%m-%dT%H:%M:%S") + "Z",
+                            "media_code": upload[0],
+                            "user": {"user_id": upload[5], "username": upload[6]},
+                            "lead": {
+                                "lead_id": upload[7],
+                                "lead_name": upload[8],
+                                "lead_at": upload[9],
+                            },
+                            "average_rating": average_rating,
+                        }
+                    )
+        return CustomerSatisfactionScoreListModel.model_validate(
+            {"averages": [data for data in customer_satisfaction_scores]}
         ).model_dump()
 
     @cached(fn_cache)
@@ -129,7 +138,10 @@ class AnalyticsService(BaseService):
                 average_rating = self.calculate_average_rating(metrics)
                 overall_score.append(average_rating)
 
-        return round(sum(overall_score) / len(overall_score), 2)
+        if overall_score and len(overall_score) > 0:
+            return round(sum(overall_score) / len(overall_score), 2)
+        else:
+            return 0.0
 
     @staticmethod
     def process_feedback_records(user_feedbacks):
@@ -154,6 +166,29 @@ class AnalyticsService(BaseService):
         return {
             "averages": averages,
         }
+
+    def average_call_duration(self, user_id: str):
+        self.media_repository.assume_user_exists(user_id)
+        uploads = self.media_repository.get_uploads(user_id)
+        total_media = [
+            {
+                "duration": media[3],
+                "media_code": media[0],
+                "timestamp": media[4].strftime("%Y-%m-%d"),
+                "lead": {
+                    "lead_id": media[7],
+                    "lead_name": media[8],
+                },
+                "user": {
+                    "user_id": media[5],
+                    "username": media[6]
+                }
+            }
+            or 0.0 for media in uploads
+            if media[3] is not None
+        ]
+        print(total_media)
+        return total_media
 
     @cached(fn_cache)
     def get_optimal_and_frail_calls(self, user_id: str) -> Dict[str, Any]:

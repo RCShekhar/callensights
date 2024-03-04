@@ -11,29 +11,27 @@ from app.src.common.config.database import get_mongodb
 
 
 class MediaRepository(GenericDBRepository):
-    def __init__(
-            self
-    ):
+    def __init__(self):
         super().__init__(Media)
         self.mongo_db = get_mongodb()
         self.user_repository = UserRepository()
 
     @handle_db_exception
     def register_media(self, media_model: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        clerk_id = media_model.get('user_id')
+        clerk_id = media_model.get("user_id")
         # media_model['clerk_id'] = clerk_id
-        media_model['user_id'] = self.user_repository.get_internal_user_id(clerk_id)
+        media_model["user_id"] = self.user_repository.get_internal_user_id(clerk_id)
         model = self.model(**media_model)
         self.session.add(model)
         self.session.commit()
         activity = {
-            'done_by': self.user_repository.get_internal_user_id(clerk_id),
-            'lead_id': media_model.get('lead_id'),
-            'activity_code': 'UPLOAD',
-            'activity_desc': 'Media uploaded',
-            'event_date': datetime.now(),
-            'stage_id': media_model.get('stage_id'),
-            'media_code': media_model.get('media_code')
+            "done_by": self.user_repository.get_internal_user_id(clerk_id),
+            "lead_id": media_model.get("lead_id"),
+            "activity_code": "UPLOAD",
+            "activity_desc": "Media uploaded",
+            "event_date": datetime.now(),
+            "stage_id": media_model.get("stage_id"),
+            "media_code": media_model.get("media_code"),
         }
 
         return activity
@@ -58,7 +56,7 @@ class MediaRepository(GenericDBRepository):
                 Media.media_len.label("media_length"),
                 Media.event_date.label("created_date"),
                 User.clerk_id.label("user_id"),
-                User.first_name.label("user_name"),
+                User.user_name.label("user_name"),
                 Lead.id.label("lead_id"),
                 Lead.name.label("lead_name"),
                 Media.conv_type.label("conv_type")
@@ -85,9 +83,11 @@ class MediaRepository(GenericDBRepository):
 
     @handle_db_exception
     def get_media_name(self, media_code) -> Optional[str]:
-        rows = (self.session.query(
-            Media.stored_file
-        ).filter(Media.media_code == media_code).all())
+        rows = (
+            self.session.query(Media.stored_file)
+            .filter(Media.media_code == media_code)
+            .all()
+        )
 
         if not rows:
             return None
@@ -105,15 +105,11 @@ class MediaRepository(GenericDBRepository):
     def is_assigned_to(self, media_code: str, user_id: str) -> bool:
         result: bool = False
 
-        query = select(
-            Media.media_code
-        ).join(
-            User,
-            User.id == Media.user_id
-        ).filter(
-            User.clerk_id == user_id
-        ).filter(
-            Media.media_code == media_code
+        query = (
+            select(Media.media_code)
+            .join(User, User.id == Media.user_id)
+            .filter(User.clerk_id == user_id)
+            .filter(Media.media_code == media_code)
         )
 
         rec = self.session.execute(query).fetchone()
@@ -128,35 +124,29 @@ class MediaRepository(GenericDBRepository):
 
         if not self.is_assigned_to(media_code, user_id):
             raise NotAssignedToUserException(
-                data={
-                    'media_code': media_code,
-                    'user_id': user_id
-                }
+                data={"media_code": media_code, "user_id": user_id}
             )
 
     @handle_db_exception
     def is_uploaded(self, media_code: str) -> bool:
         query = select(Media.is_uploaded).where(Media.media_code == media_code)
-        status, = self.session.execute(query).fetchone()
+        (status,) = self.session.execute(query).fetchone()
 
-        return True #status
+        return True  # status
 
     @handle_db_exception
     def is_feedback_generated(self, media_code) -> bool:
         return_value = False
 
-        query = select(
-            MediaStatus.fedbk_status_cd
-        ).join(
-            Media,
-            Media.id == MediaStatus.media_id
-        ).filter(
-            Media.media_code == media_code
+        query = (
+            select(MediaStatus.fedbk_status_cd)
+            .join(Media, Media.id == MediaStatus.media_id)
+            .filter(Media.media_code == media_code)
         )
 
         row = self.session.execute(query).fetchone()
-        status, = row
-        if status in ['S', 'C']:
+        (status,) = row
+        if status in ["S", "C"]:
             return_value = True
 
         return return_value
@@ -165,18 +155,15 @@ class MediaRepository(GenericDBRepository):
     def is_transcript_generated(self, media_code) -> bool:
         return_value = False
 
-        query = select(
-            MediaStatus.trans_status_cd
-        ).join(
-            Media,
-            Media.id == MediaStatus.media_id
-        ).filter(
-            Media.media_code == media_code
+        query = (
+            select(MediaStatus.trans_status_cd)
+            .join(Media, Media.id == MediaStatus.media_id)
+            .filter(Media.media_code == media_code)
         )
 
         row = self.session.execute(query).fetchone()
-        status, = row
-        if status in ['S', 'C']:
+        (status,) = row
+        if status in ["S", "C"]:
             return_value = True
 
         return return_value
