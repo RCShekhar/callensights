@@ -1,5 +1,16 @@
-from typing import List
+from typing import List, Dict, Any, Union
 from pydantic import BaseModel
+
+
+class User(BaseModel):
+    user_id: str
+    username: str
+
+
+class Lead(BaseModel):
+    lead_id: int
+    lead_name: str
+    lead_at: str
 
 
 class Average(BaseModel):
@@ -9,12 +20,6 @@ class Average(BaseModel):
 
 class CsatScoreModel(BaseModel):
     averages: List[Average]
-
-
-class Lead(BaseModel):
-    lead_id: int
-    lead_name: str
-    lead_at: str
 
 
 class Calls(BaseModel):
@@ -29,19 +34,10 @@ class OptimalFrailCallsModel(BaseModel):
 
 
 class CallRatingMetricsModel(BaseModel):
-    metric: str
-    average_rating: float
-
-
-class User(BaseModel):
-    user_id: str
-    username: str
-
-
-class Lead(BaseModel):
-    lead_id: int
-    lead_name: str
-    lead_at: str
+    metrics: List[Dict[str, Any]]
+    user: User
+    lead: Lead
+    media_code: str
 
 
 class CustomerSatisfactionScoreModel(BaseModel):
@@ -56,3 +52,9 @@ class CustomerSatisfactionScoreListModel(BaseModel):
     averages: List[CustomerSatisfactionScoreModel]
 
 
+class AverageCallDurationModel(BaseModel):
+    duration: Union[float, int]
+    media_code: str
+    timestamp: str
+    lead: Lead
+    user: User

@@ -11,7 +11,7 @@ from app.src.core.schemas.responses.analytics_response import (
     CallRatingMetricsModel,
     OptimalFrailCallsModel,
     CustomerSatisfactionScoreModel,
-    CustomerSatisfactionScoreListModel,
+    CustomerSatisfactionScoreListModel, AverageCallDurationModel,
 )
 from app.src.core.services.base_service import BaseService
 from cachetools import cached, TTLCache
@@ -187,7 +187,16 @@ class AnalyticsService(BaseService):
             or 0.0 for media in uploads
             if media[3] is not None
         ]
-        return total_media
+
+        return [AverageCallDurationModel.model_validate(
+            {
+                "duration": media["duration"],
+                "media_code": media["media_code"],
+                "timestamp": media["timestamp"],
+                "lead": media["lead"],
+                "user": media["user"]
+            }
+        ).model_dump() for media in total_media]
 
     @cached(fn_cache)
     def get_optimal_and_frail_calls(self, user_id: str) -> Dict[str, Any]:
@@ -246,9 +255,18 @@ class AnalyticsService(BaseService):
 
         calls_data = [
             {
-                "feedback_metrics": feedbacks_by_media_code[upload[0]]["feedback"][
+                "metrics": feedbacks_by_media_code[upload[0]]["feedback"][
                     "metrics"
                 ],
+                "user": {
+                    "user_id": upload[5],
+                    "username": upload[6],
+                },
+                "lead": {
+                    "lead_id": upload[7],
+                    "lead_name": upload[8],
+                    "lead_at": upload[9],
+                },
                 "media_code": upload[0],
             }
             for upload in uploaded_media
@@ -259,7 +277,7 @@ class AnalyticsService(BaseService):
         metric_counts = defaultdict(int)
 
         for call in calls_data:
-            for metric in call["feedback_metrics"]:
+            for metric in call["metrics"]:
                 metric_name = metric["metric_name"]
 
                 if not self.is_valid_rating(metric["rating"]):
@@ -272,19 +290,14 @@ class AnalyticsService(BaseService):
                 metric_sums[metric_name] += rating
                 metric_counts[metric_name] += 1
 
-        average_metrics = [
-            CallRatingMetricsModel.model_validate(
-                {
-                    "metric": metric_name,
-                    "average_rating": round(
-                        metric_sums[metric_name] / metric_counts[metric_name], 2
-                    ),
-                }
-            ).model_dump()
-            for metric_name in metric_sums
-        ]
-
-        return average_metrics
+        return [CallRatingMetricsModel.model_validate(
+            {
+                "metric_name": metric_name,
+                "average_rating": round(
+                    metric_sums[metric_name] / metric_counts[metric_name], 2
+                ),
+            }
+        ).model_dump() for metric_name in metric_sums]
 
     @staticmethod
     def is_valid_rating(rating: Any) -> bool:

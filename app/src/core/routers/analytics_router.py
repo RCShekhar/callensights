@@ -8,7 +8,7 @@ from app.src.common.security.authorization import DecodedPayload, JWTBearer
 from app.src.core.schemas.responses.analytics_response import (
     CallRatingMetricsModel,
     CustomerSatisfactionScoreListModel,
-    OptimalFrailCallsModel,
+    OptimalFrailCallsModel, AverageCallDurationModel,
 )
 from app.src.core.services.analytics_service import AnalyticsService
 
@@ -65,7 +65,7 @@ async def call_rating_metrics(
 @analytics_router.get(
     "/average-call-duration",
     summary="Call Rating Metrics",
-    response_model=List[CallRatingMetricsModel],
+    response_model=List[AverageCallDurationModel],
     response_model_by_alias=False,
 )
 async def average_call_duration(
