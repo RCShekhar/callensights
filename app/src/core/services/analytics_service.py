@@ -178,6 +178,7 @@ class AnalyticsService(BaseService):
                 "lead": {
                     "lead_id": media[7],
                     "lead_name": media[8],
+                    "lead_at": media[9],
                 },
                 "user": {
                     "user_id": media[5],
