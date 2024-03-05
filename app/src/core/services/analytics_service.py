@@ -274,9 +274,6 @@ class AnalyticsService(BaseService):
             if upload[0] in feedbacks_by_media_code
         ]
 
-        metric_sums = defaultdict(float)
-        metric_counts = defaultdict(int)
-
         for call in calls_data:
             for metric in call["metrics"]:
                 metric_name = metric["metric_name"]
@@ -288,17 +285,9 @@ class AnalyticsService(BaseService):
                 if rating is None:
                     continue
 
-                metric_sums[metric_name] += rating
-                metric_counts[metric_name] += 1
-
         return [CallRatingMetricsModel.model_validate(
-            {
-                "metric_name": metric_name,
-                "average_rating": round(
-                    metric_sums[metric_name] / metric_counts[metric_name], 2
-                ),
-            }
-        ).model_dump() for metric_name in metric_sums]
+            data
+        ).model_dump() for data in calls_data]
 
     @staticmethod
     def is_valid_rating(rating: Any) -> bool:
