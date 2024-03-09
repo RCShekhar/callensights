@@ -72,6 +72,7 @@ class GenericDBRepository:
         uid, = self.session.execute(query).fetchone()
         return uid
 
+    @handle_db_exception
     def assume_lead_assigned_to(self, lead_id: int, user_id: str) -> None:
         if self.is_admin(user_id):
             return
@@ -91,3 +92,9 @@ class GenericDBRepository:
         if cursor.first() is None:
             return False
         return True
+
+    @handle_db_exception
+    def get_internal_id(self, table: Base, column: str, name: str) -> int:
+        query = select(table.id.lable("id")).where(table.c[column] == name)
+        result = self.session.execute(query).fetchone()
+        return result._asdict()['id']

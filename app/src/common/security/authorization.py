@@ -4,6 +4,7 @@ from typing import Optional, TypedDict
 from botocore.exceptions import ClientError
 import boto3
 
+from app.src.common.app_logging.logging import logger
 from app.src.common.config.app_settings import get_app_settings
 from fastapi import Request, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -90,10 +91,10 @@ class JWTDecoder:
             )
             return payload
         except jwt.ExpiredSignatureError:
-            logging.error("Token has expired.")
+            logger.error("Token has expired.")
             raise
         except jwt.InvalidTokenError:
-            logging.error("Invalid token.")
+            logger.error("Invalid token.")
             raise
 
     def get_secret(self) -> str:

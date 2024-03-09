@@ -355,3 +355,29 @@ ALTER TABLE callensights.cns_media_status MODIFY ms_fedbk_start_dt DATETIME     
 ALTER TABLE callensights.cns_media_status MODIFY ms_comments VARCHAR(200)     COMMENT 'comments on the process completion';
 
 ALTER TABLE callensights.cns_media_status MODIFY ms_stage_inputs VARCHAR(1000)     COMMENT 'input or SQS message string';
+
+CREATE  TABLE cns_ats.cns_accounts (
+	account_id           INT   NOT NULL AUTO_INCREMENT  PRIMARY KEY,
+	account_name         VARCHAR(100)    NOT NULL   ,
+	display_name         VARCHAR(100)       ,
+	account_status       BOOLEAN  DEFAULT (1)  NOT NULL   ,
+	account_owner        INT  NOT NULL   ,
+	account_type         INT  UNSIGNED   ,
+	website              VARCHAR(256)    NOT NULL   ,
+	industry             VARCHAR(32)       ,
+	contract_start_dt    DATE  DEFAULT (CURRENT_DATE)  NOT NULL   ,
+	contract_end_dt      DATE       ,
+	job_submission_workflow INT UNSIGNED      ,
+	created_by           INT    NOT NULL   ,
+	created_dt           DATETIME  DEFAULT (CURRENT_TIMESTAMP)  NOT NULL   ,
+	modified_by          INT       ,
+	modified_dt          DATETIME   ON UPDATE CURRENT_TIMESTAMP
+ ) engine=InnoDB;
+
+ALTER TABLE cns_ats.cns_accounts ADD CONSTRAINT fk_cns_accounts_type FOREIGN KEY ( account_type ) REFERENCES cns_ats.cns_account_type( type_id ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+ALTER TABLE cns_ats.cns_accounts ADD CONSTRAINT fk_cns_accounts_workflow FOREIGN KEY ( job_submission_workflow ) REFERENCES cns_ats.cns_job_submission_workflow( workflow_id ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+ALTER TABLE cns_ats.cns_accounts ADD CONSTRAINT fk_cns_accounts_created FOREIGN KEY ( created_by ) REFERENCES cns_ats.cns_user_def( cu_user_id ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+ALTER TABLE cns_ats.cns_accounts ADD CONSTRAINT fk_cns_accounts_modified FOREIGN KEY ( modified_by ) REFERENCES cns_ats.cns_user_def( cu_user_id ) ON DELETE NO ACTION ON UPDATE NO ACTION;
