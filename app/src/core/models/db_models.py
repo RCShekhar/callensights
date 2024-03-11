@@ -224,4 +224,6 @@ class AccountType(Base):
     __tablename__ = "cns_account_type"
 
     id: Mapped[int] = mapped_column("type_id", primary_key=True)
-    name: Mapped[int] = mapped_column("type_name", nullable=False)
+    code: Mapped[str] = mapped_column("type_code", nullable=False, unique=True)
+    name: Mapped[str] = mapped_column("type_name")
+    is_active: Mapped[bool] = mapped_column("is_active", nullable=False)

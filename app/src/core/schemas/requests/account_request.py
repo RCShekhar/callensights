@@ -3,14 +3,14 @@ from typing import Optional
 
 from pydantic import BaseModel, HttpUrl
 
-from app.src.common.enum.account_enums import JobWorkflows
+from app.src.common.enum.account_enums import JobWorkflowsEnum
 
 
-class CreateAccountRequest(BaseModel):
+class CreateAccountRequestModel(BaseModel):
     account_name: str
     display_name: str
     account_owner: Optional[str] = None
     account_type: str = 'CLIENT'
     website: HttpUrl
     industry: Optional[str] = None
-    job_submission_workflow: JobWorkflows
+    job_submission_workflow: JobWorkflowsEnum

@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class CreateAccountResponse(BaseModel):
-    account_code: str
+class CreateAccountResponseModel(BaseModel):
+    account_id: str
     account_name: str
     comment: str
