@@ -1,3 +1,4 @@
 # Elastic Beanstalk Files
 **/__pycache__/**
 **/.terraform/**
+/.venv
