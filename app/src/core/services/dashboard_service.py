@@ -48,6 +48,24 @@ class DashboardService(BaseService):
             "OVERALL_SCORE": overall_score,
         }
 
+
+        individual_scores = {}
+        media_codes = [media["media_code"] for media in uploads]
+        for media_code in media_codes:
+            metrics = self.repository.get_media_metrics(media_code)
+            if not metrics:
+                continue
+            for metric in metrics:
+                key = metric.get("metric_name")
+                rating = float(metric.get("rating"))
+                if key in response:
+                    individual_scores[key] += rating
+                    individual_scores[key] /= 2
+                else:
+                    individual_scores[key] = rating
+
+        response["OVERALL_SCORE"] = sum(list(individual_scores.values()))
+        response.update(individual_scores)
         result = [
             {"metric_name": key, "rating": value} for key, value in response.items()
         ]

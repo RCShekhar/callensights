@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Dict, Any, List, Optional
 
-from sqlalchemy import Row, select
+from sqlalchemy import Row, select, update
 from app.src.common.decorators.db_exception_handlers import handle_db_exception
 from app.src.common.exceptions.exceptions import NotAssignedToUserException
 from app.src.core.models.db_models import Media, Lead, User, MediaStatus
@@ -132,7 +132,7 @@ class MediaRepository(GenericDBRepository):
         query = select(Media.is_uploaded).where(Media.media_code == media_code)
         (status,) = self.session.execute(query).fetchone()
 
-        return True  # status
+        return status
 
     @handle_db_exception
     def is_feedback_generated(self, media_code) -> bool:
@@ -167,3 +167,9 @@ class MediaRepository(GenericDBRepository):
             return_value = True
 
         return return_value
+
+    @handle_db_exception
+    def update_media_attributes(self, media_code: str,  **kwargs) -> None:
+        stmt = update(Media).where(Media.media_code == media_code).values(kwargs)
+        self.session.execute(stmt)
+        self.session.commit()

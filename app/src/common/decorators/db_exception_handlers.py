@@ -3,6 +3,7 @@ from typing import Callable
 
 from sqlalchemy.exc import SQLAlchemyError
 
+from app.src.common.app_logging.logging import logger
 from app.src.common.exceptions.application_exception import BaseAppException
 from app.src.common.enum.custom_error_code import CustomErrorCode
 
@@ -13,6 +14,7 @@ def handle_db_exception(func: Callable) -> Callable:
         try:
             return func(*args, **kwargs)
         except SQLAlchemyError as e:
+            logger.error(f"Error: {e}")
             raise BaseAppException(
                 status_code=500,
                 description=str(e),
@@ -20,6 +22,7 @@ def handle_db_exception(func: Callable) -> Callable:
                 data={'args': args, "kwargs": kwargs}
             )
         except Exception as e:
+            logger.error(f"Error: {e}")
             raise BaseAppException(
                 status_code=500,
                 description=str(e),

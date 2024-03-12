@@ -5,11 +5,14 @@ from fastapi import Request
 from fastapi.exceptions import RequestValidationError
 from starlette.responses import JSONResponse
 
+from app.src.common.app_logging.logging import logger
 from app.src.common.exceptions.application_exception import BaseAppException
 
 
 def log_exception(exc: BaseException, request: Request) -> None:
-    pass
+    logger.error(f"Error occurred for the request {request}")
+    logger.error(traceback.format_exc())
+    logger.error(exc)
 
 
 async def app_exception_handler(request: Request, exc: BaseAppException) -> JSONResponse:
