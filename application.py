@@ -24,6 +24,7 @@ from app.src.core.routers.dashboard_routers import dashboard_router
 from app.src.core.routers.media_routers import media_router
 from app.src.core.routers.users_routers import user_router
 from app.src.core.routers.lead_routers import lead_router
+from app.src.core.routers.analytics_router import analytics_router
 from fastapi.middleware.gzip import GZipMiddleware
 
 from app.src.common.security.authorization import JWTBearer
@@ -54,8 +55,8 @@ application.include_router(media_router, prefix="/media")
 application.include_router(user_router, prefix="/user")
 application.include_router(lead_router, prefix="/lead")
 application.include_router(dashboard_router, prefix="/dashboard")
-application.include_router(account_router, prefix="/account")
-# application.include_router(candidate_router, prefix="/candidate")
+application.include_router(analytics_router, prefix="/analytics")
+
 
 
 @application.get("/", dependencies=[Depends(JWTBearer())], tags=["Home"])

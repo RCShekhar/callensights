@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Mapping
 
 from pymongo.results import InsertOneResult
 from sqlalchemy import create_engine, URL
@@ -93,6 +93,16 @@ class MongoDB:
             response = dict(response).copy()
             del response['_id']
             return response
+
+    def get_feedbacks(self) -> list[Mapping[str, Any] | Any]:
+        """
+        Get all feedbacks from the MongoDB.
+        """
+        with self.get_connection() as client:
+            db = client[self.database]
+            collection = db["feedbacks"]
+            response = collection.find()
+            return list(response)
 
 
 def get_db_session():

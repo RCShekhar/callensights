@@ -111,7 +111,7 @@ class LeadRepository(GenericDBRepository):
                 Lead.st_province.label("state"),
                 Lead.lead_desc.label("description"),
                 User.clerk_id.label("assigned_clerk_id"),
-                User.user_name.label("assigned_user_name")
+                User.user_name.label("assigned_user_name"),
             )
             .join(User, User.id == Lead.assigned_to)
             .where(Lead.id == lead_id)
@@ -126,7 +126,7 @@ class LeadRepository(GenericDBRepository):
         TargetedUser = aliased(User)
         stmt = (
             select(
-                ActionedUser.first_name.label("user_name"),
+                ActionedUser.user_name.label("user_name"),
                 ActionedUser.clerk_id.label("user_id"),
                 Activity.event_date.label("event_date"),
                 Activity.activity_code.label("event_type"),
