@@ -60,7 +60,7 @@ class TranscriptionService(BaseService):
                             prompt="",
                             timestamp_granularities=["segment"],
                         )
-                        transcription = response.model_dump_json()
+                        transcription = response.model_dump()
                         aggregated_result["text"] += transcription["text"] + " "
                         aggregated_result["segments"].extend(transcription["segments"])
 
