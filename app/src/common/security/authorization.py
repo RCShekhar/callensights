@@ -48,6 +48,7 @@ class JWTDecoder:
             service_name="secretsmanager",
             region_name="us-east-1",
         )
+        self.secret = self.get_secret()
 
     def extract_bearer_token(self, authorization_header: str) -> Optional[str]:
         """
@@ -80,7 +81,7 @@ class JWTDecoder:
             jwt.ExpiredSignatureError: If the token has expired.
             jwt.InvalidTokenError: If the token is invalid.
         """
-        secret = self.get_secret()
+        secret = self.secret
         try:
             payload = jwt.decode(
                 token,

@@ -2,3 +2,7 @@
 **/__pycache__/**
 **/.terraform/**
 /.venv
+venv
+.vscode
+.idea
+.DS_Store
