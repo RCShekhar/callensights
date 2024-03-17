@@ -1,0 +1,19 @@
+branch-defaults:
+  feature/cns-ats:
+    environment: Cns-unified-application-v2-app-env
+environment-defaults:
+  Cns-unified-application-v2-app-env:
+    branch: null
+    repository: null
+global:
+  application_name: cns-unified-application-v2-app
+  default_ec2_keyname: aws-eb
+  default_platform: Docker running on 64bit Amazon Linux 2023
+  default_region: us-east-1
+  include_git_submodules: true
+  instance_profile: null
+  platform_name: null
+  platform_version: null
+  profile: null
+  sc: git
+  workspace_type: Application
