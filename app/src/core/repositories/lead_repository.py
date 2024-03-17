@@ -26,11 +26,8 @@ class LeadRepository(GenericDBRepository):
     @handle_db_exception
     def add_lead(self, lead_model: Dict[str, Any]) -> Dict[str, Any]:
         dump = lead_model
-        row = self.session.execute(
-            select(LeadStages.id.label("stage_id")).where(
-                LeadStages.code == dump["stage_code"]
-            )
-        ).fetchone()
+        query = select(LeadStages.id.label("stage_id")).where(LeadStages.code == dump["stage_code"])
+        row = self.session.execute(query).fetchone()
         dump.update(row._asdict())
 
         row = self.session.execute(

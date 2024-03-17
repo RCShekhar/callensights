@@ -1,0 +1,16 @@
+version: "4.27"
+
+services:
+  app:
+    container_name: callensights-v2
+    build: .
+    working_dir: /app
+    command: poetry run uvicorn application:application --host 0.0.0.0 --reload
+    volumes:
+      - ~/.aws/credentials:/home/user/.aws/credentials
+    environment:
+      AWS_SHARED_CREDENTIALS_FILE: /home/user/.aws/credentials
+    ports:
+      - 8000:8000
+
+    restart: on-failure

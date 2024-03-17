@@ -9,6 +9,7 @@ from app.src.core.services.background_service import BackgroundService
 
 background_router = APIRouter(tags=["Background Tasks"])
 
+
 @background_router.post(
     "/background-task",
     summary="Request for transcription background task",
@@ -24,4 +25,3 @@ async def background_task(
     user_id = decoded_payload.get('user_id')
     response = service.run_background_task(request, bg_tasks)
     return JSONResponse(content=response.model_dump())
-

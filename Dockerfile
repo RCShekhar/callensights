@@ -9,6 +9,10 @@ COPY pyproject.toml .
 RUN pip install -r requirements.txt
 RUN poetry install --no-cache
 
+RUN apt-get -y update
+RUN apt-get -y upgrade
+RUN apt-get install -y ffmpeg
+
 COPY . .
 
 RUN chmod +x .

@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Tuple, Any
 from boto3 import client
 from fastapi import Depends
@@ -42,3 +43,8 @@ class S3Repository(AwsRepository):
         except Exception as e:
             status = False
         return status
+
+    def download_media(self, bucket_name: str, media_name: str) -> Path:
+        file_location = f"./{media_name}"
+        self.client.download_file(bucket_name, media_name, file_location)
+        return Path(file_location)

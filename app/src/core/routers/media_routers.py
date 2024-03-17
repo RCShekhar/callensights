@@ -21,10 +21,10 @@ media_router = APIRouter(tags=["Media"])
 async def upload_media(
         inputs: UploadMediaInputsModel,
         upload_service: MediaService = Depends(),
-        decoaded_payload: DecodedPayload = Depends(JWTBearer())
+        decoded_payload: DecodedPayload = Depends(JWTBearer())
 ) -> JSONResponse:
     input_dict = inputs.model_dump()
-    input_dict['user_id'] = decoaded_payload.get('user_id')
+    input_dict['user_id'] = decoded_payload.get('user_id')
     response = upload_service.register_media(input_dict)
 
     return JSONResponse(content=[model.model_dump() for model in response])
@@ -38,9 +38,9 @@ async def upload_media(
 )
 async def get_uploads(
         service: MediaService = Depends(),
-        decoaded_payload: DecodedPayload = Depends(JWTBearer())
+        decoded_payload: DecodedPayload = Depends(JWTBearer())
 ) -> JSONResponse:
-    user_id = decoaded_payload.get('user_id')
+    user_id = decoded_payload.get('user_id')
     response = service.get_uploads(user_id)
     return JSONResponse(content=[model.model_dump() for model in response])
 
@@ -53,9 +53,9 @@ async def get_uploads(
 async def get_media(
         media_code: str,
         media_service: MediaService = Depends(),
-        decoaded_payload: DecodedPayload = Depends(JWTBearer())
+        decoded_payload: DecodedPayload = Depends(JWTBearer())
 ) -> StreamingResponse:
-    user_id = decoaded_payload.get('user_id')
+    user_id = decoded_payload.get('user_id')
     return media_service.get_media_stream(media_code, user_id)
 
 
@@ -67,9 +67,9 @@ async def get_media(
 async def get_feedback(
         media_code: str,
         media_service: MediaService = Depends(),
-        decoaded_payload: DecodedPayload = Depends(JWTBearer())
+        decoded_payload: DecodedPayload = Depends(JWTBearer())
 ) -> JSONResponse:
-    user_id = decoaded_payload.get('user_id')
+    user_id = decoded_payload.get('user_id')
     return JSONResponse(**media_service.get_feedback(media_code, user_id))
 
 
@@ -81,7 +81,7 @@ async def get_feedback(
 async def get_transcript(
         media_code: str,
         media_service: MediaService = Depends(),
-        decoaded_payload: DecodedPayload = Depends(JWTBearer())
+        decoded_payload: DecodedPayload = Depends(JWTBearer())
 ) -> JSONResponse:
-    user_id = decoaded_payload.get('user_id')
+    user_id = decoded_payload.get('user_id')
     return JSONResponse(**media_service.get_transcription(media_code, user_id))

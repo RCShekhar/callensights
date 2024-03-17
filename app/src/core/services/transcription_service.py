@@ -50,7 +50,9 @@ class TranscriptionService(BaseService):
 
             for index, chunk in enumerate(chunks, start=1):
                 with tempfile.NamedTemporaryFile(delete=True, suffix=media_path.suffix) as temp_file:
-                    chunk.export(temp_file.name, format=media_path.suffix.lstrip('.'))
+                    # ffmpeg fails to export m4a chunks, It's recommended to use ipod format as an alternate
+                    format = "ipod" if media_path.suffix.lstrip('.') == 'm4a' else media_path.suffix.lstrip('.')
+                    chunk.export(temp_file.name, format=format)
                     with open(temp_file.name, 'rb') as media_chunk_file:
                         logger.debug(f"Transcribing chunk {index} of {len(chunks)}")
                         response = self.client.audio.transcriptions.create(
@@ -68,7 +70,12 @@ class TranscriptionService(BaseService):
             return aggregated_result
         except Exception as e:
             logger.error(f"Error during transcription of file {media_path}: {e}", exc_info=True)
+            if media_path.exists():
+                media_path.unlink()
             raise
+        finally:
+            if media_path.exists():
+                media_path.unlink()
 
     def split_audio(self, media_path: Path) -> List[AudioSegment]:
         """
@@ -146,7 +153,7 @@ class TranscriptionService(BaseService):
 
 
 if __name__ == "__main__":
-    audio_file_path = Path('/Users/bharath/Downloads/Vertocity/sample.mp3')
+    audio_file_path = Path('/Users/rachakonda/Work/Callensights/backends/audio/record_3.m4a')
     transcription_service = TranscriptionService()
     result = transcription_service.generate_transcription(media_path=audio_file_path)
     print("Transcription Result:\n", result)
