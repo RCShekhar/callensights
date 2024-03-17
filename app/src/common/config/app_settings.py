@@ -20,8 +20,6 @@ class Settings(BaseSettings):
 
     # AWS Buckets
     MEDIA_BUCKET: str
-    TRANSCRIPT_BUCKET: str
-    ANALYSIS_BUCKET: str
 
     # Application configuration
     MEDIA_MIN_SIZE: int
