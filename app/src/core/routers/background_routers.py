@@ -23,5 +23,5 @@ async def background_task(
         service: BackgroundService = Depends()
 ) -> JSONResponse:
     user_id = decoded_payload.get('user_id')
-    response = service.run_background_task(request, bg_tasks)
+    response = service.run_background_task(user_id, request, bg_tasks)
     return JSONResponse(content=response.model_dump())

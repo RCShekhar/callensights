@@ -1,7 +1,11 @@
+import os
+import traceback
 from pathlib import Path
 from typing import Dict, Any
 
+import openai
 from fastapi import Depends, BackgroundTasks
+from openai import OpenAI
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.src.common.app_logging.logging import logger
@@ -27,6 +31,8 @@ class BackgroundService(BaseService):
         self.feedback_service = feedback_service
         self.repository = repository
         self.s3_repository = S3Repository()
+        self.GPT_MODEL = 'gpt-4'
+        self.MAX_MESSAGES = 10
 
     async def generate_transcription(
             self,
@@ -48,7 +54,8 @@ class BackgroundService(BaseService):
             media_code,
             BackgroundStageEnum.TRANSCRIPTION,
             'R',
-            'Transcription Started'
+            'Transcription Started',
+            str(request)
         )
 
         local_media: Path = Path()
@@ -66,6 +73,7 @@ class BackgroundService(BaseService):
             )
         except SQLAlchemyError as e:
             logger.error(f"TRANSCRIPTION_ERROR: {e}")
+            logger.error(traceback.format_exc())
             self.repository.update_stage(
                 media_code,
                 BackgroundStageEnum.TRANSCRIPTION,
@@ -75,6 +83,7 @@ class BackgroundService(BaseService):
             return
         except Exception as e:
             logger.error(f"TRANSCRIPTION_ERROR: {e}")
+            logger.error(traceback.format_exc())
             self.repository.update_stage(
                 media_code,
                 BackgroundStageEnum.TRANSCRIPTION,
@@ -86,16 +95,9 @@ class BackgroundService(BaseService):
             if local_media.is_file():
                 local_media.unlink()
 
-    async def generate_feedback(
-            self,
-            request: Dict[str, Any]
-    ):
-        media_code = request.get('media_code')
-        media_file = request.get('media_file')
-        bucket = request.get('media_bucket')
-
     def run_background_task(
             self,
+            user_id: str,
             inputs: BackgroundTaskRequestModel,
             bg_tasks: BackgroundTasks
     ) -> BackgroundTaskResponseModel:
@@ -104,7 +106,6 @@ class BackgroundService(BaseService):
             comment=f'{inputs.stage.value}Task Registered Successfully..'
         )
         media_code = inputs.media_code
-        bucket = inputs.media_bucket
         media_file = inputs.media_file
 
         if not self.repository.is_media_registered(media_code):
@@ -136,8 +137,11 @@ class BackgroundService(BaseService):
                 return_value.comment = f"Feedback already generated for media {media_code}"
                 return return_value
 
+            input_dict = inputs.model_dump()
+            input_dict['user_id'] = user_id
             bg_tasks.add_task(
-                self.generate_feedback, inputs.model_dump()
+                self.generate_feedback,
+                input_dict
             )
         else:
             return BackgroundTaskResponseModel(
@@ -145,3 +149,94 @@ class BackgroundService(BaseService):
                 comments=f"Invalid stage  {inputs.stage}"
             )
         return return_value
+
+    async def generate_feedback(
+            self,
+            request: Dict[str, Any]
+    ):
+        client = OpenAI()
+        media_code = request.get('media_code')
+        user_id = request.get('user_id')
+
+        logger.info("Feedback Generation started")
+
+        self.repository.update_stage(
+            media_code,
+            BackgroundStageEnum.FEEDBACK,
+            'R',
+            "Feedback Generation Started..",
+            stage_inputs=str(request)
+        )
+
+        try:
+
+            transcription = self.repository.get_transcription(media_code)
+            openai.api_key = os.environ.get("OPENAI_API_KEY")
+
+            feedback = {}
+            record = {'media_code': media_code, 'feedback': feedback}
+            messages = []
+            messages += self.repository.get_systems_messages(user_id)
+            messages.append({
+                'role': 'user',
+                'content': transcription['text']
+            })
+            client.chat.completions.create(
+                model=self.GPT_MODEL,
+                messages=messages[-self.MAX_MESSAGES:]
+            )
+
+            for question in self.repository.get_user_messages():
+                question_type = question.get('type')
+                messages.append(question.get('message'))
+                completion = client.chat.completions.create(
+                    model=self.GPT_MODEL,
+                    messages=messages[-self.MAX_MESSAGES:]
+                )
+                m = completion.choices[0].message
+                messages.append(m)
+                feedback[question_type] = m.content.split('\n')
+            else:
+                messages.append({
+                    'role': 'user',
+                    'content': 'Provide rating for following metrics based out of 10 and give only number'
+                })
+                completion = client.chat.completions.create(
+                    model=self.GPT_MODEL,
+                    messages=messages[-self.MAX_MESSAGES:]
+                )
+                messages.append(completion.choices[0].message)
+
+            metrics = []
+            feedback['metrics'] = metrics
+            for question in self.repository.get_metric_prompts(media_code):
+                messages.append(question)
+                completion = client.chat.completions.create(
+                    model=self.GPT_MODEL,
+                    messages=messages[-self.MAX_MESSAGES:]
+                )
+                msg = completion.choices[0].message
+                messages.append(msg)
+                metrics.append({
+                    'metric_name': question.get('content'),
+                    'rating': msg.content,
+                    'absolute_rating': msg.content + "/10"
+                })
+            logger.info("Feedback generated..")
+            self.repository.mongodb.put_feedback(record)
+            logger.info("Feedback stored successfully")
+
+            self.repository.update_stage(
+                media_code,
+                BackgroundStageEnum.FEEDBACK,
+                'S',
+                "Feedback generation completed Successfully.."
+            )
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            self.repository.update_stage(
+                media_code,
+                BackgroundStageEnum.FEEDBACK,
+                'F',
+                f"ERROR: {e}"
+            )

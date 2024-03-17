@@ -562,13 +562,13 @@ opentelemetry = ["Deprecated (>=1.2.6)", "typing-extensions (>=3.7.4)", "zipp (>
 
 [[package]]
 name = "openai"
-version = "1.13.3"
+version = "1.14.1"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.7.1"
 files = [
-    {file = "openai-1.13.3-py3-none-any.whl", hash = "sha256:5769b62abd02f350a8dd1a3a242d8972c947860654466171d60fb0972ae0a41c"},
-    {file = "openai-1.13.3.tar.gz", hash = "sha256:ff6c6b3bc7327e715e4b3592a923a5a1c7519ff5dd764a83d69f633d49e77a7b"},
+    {file = "openai-1.14.1-py3-none-any.whl", hash = "sha256:f9322b0bf3b82bbd06930fad535369a023f35a3a96d3ef0b827644a15d7aae97"},
+    {file = "openai-1.14.1.tar.gz", hash = "sha256:1fab5dd623cdc0c7c6e7da5d8d11fa6900f94191c2dfb6510d7eac33195fa175"},
 ]
 
 [package.dependencies]
@@ -1228,4 +1228,4 @@ tests = ["build", "coverage", "mypy", "pyyaml", "ruff", "wheel"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "3666ec209ee08954037c32190fbdbdeaeab1d8732011d97065636bb529c45141"
+content-hash = "923e29157853995918009b48a0ad59055792bfee8a0997e8bb3bf8f928a19cce"
