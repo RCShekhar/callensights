@@ -5,6 +5,7 @@ from sqlalchemy import update, select, text
 from app.src.common.config.database import get_mongodb, MongoDB
 from app.src.common.enum.background_enums import BackgroundStageEnum
 from app.src.core.models.db_models import Media, MediaStatus, User
+from app.src.core.repositories.aws_repositories import SQSRepository
 from app.src.core.repositories.geniric_repository import GenericDBRepository
 
 
@@ -14,6 +15,7 @@ class BackgroundRepository(GenericDBRepository):
     ) -> None:
         super().__init__(None)
         self.mongodb: MongoDB = get_mongodb()
+        self.sqs_repository: SQSRepository = SQSRepository()
 
     def is_media_registered(self, media_code: str) -> bool:
         query = select(Media.media_code).where(Media.media_code == media_code)
@@ -104,7 +106,7 @@ class BackgroundRepository(GenericDBRepository):
             "Seeks to retain and expand key accounts by providing excellent, strategic recruiting services"
         ]
 
-        query = select(User.organization, User.role).where(User.clerk_id==user_id)
+        query = select(User.organization, User.role).where(User.clerk_id == user_id)
         user_details = self.session.execute(query).fetchone()
 
         messages = [{
@@ -117,14 +119,14 @@ class BackgroundRepository(GenericDBRepository):
     def get_user_messages(self) -> List[Dict[str, Any]]:
         messages = [
             {
-                'type':"overall_feedback",
+                'type': "overall_feedback",
                 'message': {
                     'role': "user",
                     'content': "Generate feedback for the representative"
                 }
             },
             {
-                'type':"pros",
+                'type': "pros",
                 'message': {
                     'role': "user",
                     'content': "Generate Procs for representative in 10 points",
@@ -132,7 +134,7 @@ class BackgroundRepository(GenericDBRepository):
             },
             {
                 'type': "cons",
-                'message' : {
+                'message': {
                     'role': "user",
                     'content': "Generate Cons for representative in 10 points"
                 }
@@ -151,4 +153,5 @@ class BackgroundRepository(GenericDBRepository):
             })
         return metrics
 
-
+    def send_feedback_request(self, request: Dict[str, Any]) -> None:
+        self.sqs_repository.send_sqs_message(request)

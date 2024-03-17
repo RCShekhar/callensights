@@ -1,5 +1,6 @@
+import json
 from pathlib import Path
-from typing import Tuple, Any
+from typing import Tuple, Any, Dict
 from boto3 import client
 from fastapi import Depends
 
@@ -48,3 +49,14 @@ class S3Repository(AwsRepository):
         file_location = f"./{media_name}"
         self.client.download_file(bucket_name, media_name, file_location)
         return Path(file_location)
+
+
+class SQSRepository(AwsRepository):
+    def __init__(self):
+        super().__init__('sql')
+
+    def send_sqs_message(self, sqs: str, message: Dict[str, Any]) -> None:
+        self.client.send_message(
+            QueueUrl=self.settings.QUEUE_URL,
+            MessageBody=json.dumps(message)
+        )

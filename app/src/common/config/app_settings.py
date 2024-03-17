@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     CLERK_SECRET: str
     CLERK_AUDIENCE: str
     REGION: str
+    QUEUE_URL: str
 
     # Database Configuration
     DEFAULT_SCHEMA: str

@@ -65,6 +65,7 @@ class BackgroundService(BaseService):
             logger.debug("Generating transcription")
             transcription = self.transcription_service.generate_transcription(local_media)
             self.repository.save_transcription(media_code, transcription)
+            self.repository.send_feedback_request(request)
             self.repository.update_stage(
                 media_code,
                 BackgroundStageEnum.TRANSCRIPTION,
