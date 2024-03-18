@@ -11,6 +11,16 @@ services:
     environment:
       AWS_SHARED_CREDENTIALS_FILE: /home/user/.aws/credentials
     ports:
-      - 8000:8000
+      - '8000:8000'
 
     restart: on-failure
+
+  nginx:
+    restart: always
+    build:
+      dockerfile: Dockerfile
+      context: nginx
+    ports:
+      - '80:80'
+    depends_on:
+      - app
