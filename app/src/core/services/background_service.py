@@ -126,8 +126,10 @@ class BackgroundService(BaseService):
                 return_value.comment = f"Transcription already generated for {media_code}"
                 return return_value
 
+            params = inputs.model_dump()
+            params['user_id'] = user_id
             bg_tasks.add_task(
-                self.generate_transcription, inputs.model_dump()
+                self.generate_transcription, params
             )
         elif inputs.stage == BackgroundStageEnum.FEEDBACK:
             if not self.repository.is_transcript_generated(media_code):
@@ -139,7 +141,6 @@ class BackgroundService(BaseService):
                 return return_value
 
             input_dict = inputs.model_dump()
-            input_dict['user_id'] = user_id
             bg_tasks.add_task(
                 self.generate_feedback,
                 input_dict

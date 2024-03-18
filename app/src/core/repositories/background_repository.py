@@ -81,7 +81,7 @@ class BackgroundRepository(GenericDBRepository):
     def get_transcription(self, media_code: str) -> Dict[str, Any]:
         return self.mongodb.get_transcription(media_code)
 
-    def get_systems_messages(self, user_id) -> List[Dict[str, Any]]:
+    def get_systems_messages(self, user_id: str) -> List[Dict[str, Any]]:
         context = [
             "This is a call transcription between a recruiter at Techintelliand a prospect Candidate/JobSeeker.Techintelliis a staffing consultancy that provides recruiting and talent acquisition services to organizations looking to hire for various roles across different Non IT industries.",
             "The recruiter works for Techintelliand has over 5 years of experience in full cycle recruiting. They speak to multiple prospect candidates on a daily basis to understand their needs, and try to close positions given by various clients that the company has.",
