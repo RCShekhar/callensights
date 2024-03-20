@@ -175,6 +175,7 @@ class BackgroundService(BaseService):
         try:
             transcription = self.repository.get_transcription(media_code)
             openai.api_key = SecretManager().get_openai_secret()
+            print(openai.api_key[-3:])
 
             feedback = {}
             record = {'media_code': media_code, 'feedback': feedback}
