@@ -9,6 +9,7 @@ from openai import OpenAI
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.src.common.app_logging.logging import logger
+from app.src.common.config.secret_manager import SecretManager
 from app.src.common.enum.background_enums import BackgroundStageEnum, BackgroundTaskStatusEnum
 from app.src.core.repositories.aws_repositories import S3Repository
 from app.src.core.repositories.background_repository import BackgroundRepository
@@ -157,7 +158,7 @@ class BackgroundService(BaseService):
             self,
             request: Dict[str, Any]
     ):
-        client = OpenAI()
+        client = OpenAI(api_key=self)
         media_code = request.get('media_code')
         user_id = request.get('user_id')
 
@@ -172,9 +173,8 @@ class BackgroundService(BaseService):
         )
 
         try:
-
             transcription = self.repository.get_transcription(media_code)
-            openai.api_key = os.environ.get("OPENAI_API_KEY")
+            openai.api_key = SecretManager().get_openai_secret()
 
             feedback = {}
             record = {'media_code': media_code, 'feedback': feedback}
