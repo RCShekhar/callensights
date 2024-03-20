@@ -53,7 +53,7 @@ class S3Repository(AwsRepository):
 
 class SQSRepository(AwsRepository):
     def __init__(self):
-        super().__init__('sql')
+        super().__init__('sqs')
 
     def send_sqs_message(self, sqs: str, message: Dict[str, Any]) -> None:
         self.client.send_message(
