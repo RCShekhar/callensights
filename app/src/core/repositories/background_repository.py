@@ -154,4 +154,5 @@ class BackgroundRepository(GenericDBRepository):
         return metrics
 
     def send_feedback_request(self, request: Dict[str, Any]) -> None:
+        request['stage'] = BackgroundStageEnum.FEEDBACK.value
         self.sqs_repository.send_sqs_message(request)
