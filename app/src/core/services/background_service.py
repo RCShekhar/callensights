@@ -158,7 +158,7 @@ class BackgroundService(BaseService):
             self,
             request: Dict[str, Any]
     ):
-        client = OpenAI(api_key=self)
+        client = OpenAI(api_key=SecretManager().get_openai_secret())
         media_code = request.get('media_code')
         user_id = request.get('user_id')
 
@@ -174,7 +174,6 @@ class BackgroundService(BaseService):
 
         try:
             transcription = self.repository.get_transcription(media_code)
-            openai.api_key = SecretManager().get_openai_secret()
             logger.info(f"API_KEY: *******{openai.api_key[-3:]}")
 
             feedback = {}
