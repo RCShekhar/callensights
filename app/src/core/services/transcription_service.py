@@ -4,11 +4,13 @@ from pathlib import Path
 from typing import Dict, Any
 from typing import List
 
+from fastapi import Depends
 from openai import OpenAI
 from pydub import AudioSegment
 from pydub.exceptions import CouldntDecodeError
 
 from app.src.common.app_logging.logging import logger
+from app.src.common.config.secret_manager import SecretManager
 from app.src.core.services.base_service import BaseService
 
 
@@ -22,10 +24,13 @@ class TranscriptionService(BaseService):
     """
     TEN_MINUTES = 10 * 60 * 1000  # 10 minutes in milliseconds
 
-    def __init__(self):
+    def __init__(
+            self,
+            secret_manager: SecretManager = Depends()
+    ):
         """Initializes the TranscriptionService with base service name and OpenAI client."""
         super().__init__("TranscriptionService")
-        openai_api_key = os.getenv('OPENAI_API_KEY')
+        openai_api_key = secret_manager.get_openai_secret()
         if not openai_api_key:
             raise ValueError("OPENAI_API_KEY environment variable not set.")
         self.client = OpenAI(api_key=openai_api_key)

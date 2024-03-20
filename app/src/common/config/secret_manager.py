@@ -16,6 +16,10 @@ class SecretManager:
             region_name=self.settings.REGION
         )
 
+    def get_openai_secret(self) -> str:
+        response = self.client.get_secret_value(SecretId="callensights/openai")
+        return response.get('OPENAI_API_KEY', None)
+
     def _get_db_secret(self, secret: str, name: str) -> Any:
         response = self.client.get_secret_value(
             SecretId=secret
