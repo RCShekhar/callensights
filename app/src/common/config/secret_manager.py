@@ -18,7 +18,9 @@ class SecretManager:
 
     def get_openai_secret(self) -> str:
         response = self.client.get_secret_value(SecretId="callensights/openai")
-        return response.get('OPENAI_API_KEY', None)
+        value = response.get('SecretString', None)
+        value = json.loads(value)['OPENAI_API_KEY']
+        return value
 
     def _get_db_secret(self, secret: str, name: str) -> Any:
         response = self.client.get_secret_value(
