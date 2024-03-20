@@ -127,6 +127,7 @@ class BackgroundService(BaseService):
                 return return_value
 
             params = inputs.model_dump()
+            params['stage'] = params['stage'].value if params['stage'] else None
             params['user_id'] = user_id
             bg_tasks.add_task(
                 self.generate_transcription, params
