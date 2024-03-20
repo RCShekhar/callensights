@@ -33,6 +33,8 @@ class TranscriptionService(BaseService):
         openai_api_key = secret_manager.get_openai_secret()
         if not openai_api_key:
             raise ValueError("OPENAI_API_KEY environment variable not set.")
+        else:
+            logger(f"Openai api key found ******{openai_api_key[-3:]}")
         self.client = OpenAI(api_key=openai_api_key)
 
     def generate_transcription(self, media_path: Path) -> Dict[str, Any]:
