@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class CustomErrorCode(Enum):
+class CustomErrorCode(str, Enum):
     AWS_ERROR = "AWS_ERROR_001"
     DATABASE_ERROR = "DATABASE_ERROR_001"
     NOT_FOUND_ERROR = "NOT_FOUND_ERROR_001"

@@ -2,6 +2,7 @@ from typing import Dict, Any, List
 
 from sqlalchemy import update, select, text
 
+from app.src.common.app_logging.logging import logger
 from app.src.common.config.database import get_mongodb, MongoDB
 from app.src.common.enum.background_enums import BackgroundStageEnum
 from app.src.core.models.db_models import Media, MediaStatus, User
@@ -154,4 +155,6 @@ class BackgroundRepository(GenericDBRepository):
         return metrics
 
     def send_feedback_request(self, request: Dict[str, Any]) -> None:
+        request['stage'] = BackgroundStageEnum.FEEDBACK.value
+        logger.info(f"Feedback request data {request}")
         self.sqs_repository.send_sqs_message(request)

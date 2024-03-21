@@ -9,6 +9,7 @@ from openai import OpenAI
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.src.common.app_logging.logging import logger
+from app.src.common.config.secret_manager import SecretManager
 from app.src.common.enum.background_enums import BackgroundStageEnum, BackgroundTaskStatusEnum
 from app.src.core.repositories.aws_repositories import S3Repository
 from app.src.core.repositories.background_repository import BackgroundRepository
@@ -127,6 +128,7 @@ class BackgroundService(BaseService):
                 return return_value
 
             params = inputs.model_dump()
+            params['stage'] = params['stage'].value if params['stage'] else None
             params['user_id'] = user_id
             bg_tasks.add_task(
                 self.generate_transcription, params
@@ -156,7 +158,9 @@ class BackgroundService(BaseService):
             self,
             request: Dict[str, Any]
     ):
-        client = OpenAI()
+        api_key = SecretManager().get_openai_secret()
+        logger.info(f"API_KEY: *******{api_key[-3:]}")
+        client = OpenAI(api_key=api_key)
         media_code = request.get('media_code')
         user_id = request.get('user_id')
 
@@ -171,9 +175,7 @@ class BackgroundService(BaseService):
         )
 
         try:
-
             transcription = self.repository.get_transcription(media_code)
-            openai.api_key = os.environ.get("OPENAI_API_KEY")
 
             feedback = {}
             record = {'media_code': media_code, 'feedback': feedback}

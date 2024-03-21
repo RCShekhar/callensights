@@ -1,11 +1,11 @@
 from enum import Enum
 
 
-class BackgroundStageEnum(Enum):
+class BackgroundStageEnum(str, Enum):
     TRANSCRIPTION: str = 'TRANSCRIPTION'
     FEEDBACK: str = 'FEEDBACK'
 
 
-class BackgroundTaskStatusEnum(Enum):
+class BackgroundTaskStatusEnum(str, Enum):
     SUCCESS: str = "SUCCESS"
     FAILED: str = "FAILED"
