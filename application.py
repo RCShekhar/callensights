@@ -5,6 +5,7 @@ from fastapi import FastAPI, Depends
 from fastapi import HTTPException
 from fastapi.exception_handlers import http_exception_handler
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.gzip import GZipMiddleware
 from starlette.middleware.cors import CORSMiddleware
 
 from app.src.common.constants.global_constants import (
@@ -12,23 +13,20 @@ from app.src.common.constants.global_constants import (
     ALLOWED_METHODS,
     ALLOWED_HEADERS,
 )
-
 from app.src.common.exceptions.application_exception import BaseAppException
 from app.src.common.exceptions.exception_handlers import (
     app_exception_handler,
     general_exception_handler,
     validation_exception_handler,
 )
+from app.src.common.security.authorization import JWTBearer
 from app.src.core.routers.account_routers import account_router
+from app.src.core.routers.analytics_router import analytics_router
 from app.src.core.routers.background_routers import background_router
 from app.src.core.routers.dashboard_routers import dashboard_router
+from app.src.core.routers.lead_routers import lead_router
 from app.src.core.routers.media_routers import media_router
 from app.src.core.routers.users_routers import user_router
-from app.src.core.routers.lead_routers import lead_router
-from app.src.core.routers.analytics_router import analytics_router
-from fastapi.middleware.gzip import GZipMiddleware
-
-from app.src.common.security.authorization import JWTBearer
 
 application = FastAPI(
     docs_url="/callensights/docs",
@@ -58,6 +56,7 @@ application.include_router(lead_router, prefix="/lead")
 application.include_router(dashboard_router, prefix="/dashboard")
 application.include_router(analytics_router, prefix="/analytics")
 application.include_router(background_router, prefix="/background-tasks")
+application.include_router(account_router, prefix="/accounts")
 
 
 @application.get("/", dependencies=[Depends(JWTBearer())], tags=["Home"])

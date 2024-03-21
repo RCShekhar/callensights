@@ -8,7 +8,7 @@ from app.src.core.models.db_models import Base
 class Account(Base):
     __tablename__ = 'account'
     account_id = Column(Integer, primary_key=True)
-    account_name = Column(String(255), nullable=False)
+    account_name = Column(String(255), nullable=False, unique=True)
     display_name = Column(String(255))
     account_status = Column(Enum('Active', 'Inactive'), nullable=False)
     account_owner = Column(String(255), nullable=False)

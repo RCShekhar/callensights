@@ -1,6 +1,7 @@
-from sqlalchemy.orm import declarative_base, Mapped, mapped_column
+from datetime import datetime
+
 from sqlalchemy import ForeignKey
-from datetime import datetime, date
+from sqlalchemy.orm import declarative_base, Mapped, mapped_column
 
 Base = declarative_base()
 
@@ -191,39 +192,3 @@ class Activity(Base):
     event_date: Mapped[datetime] = mapped_column("ca_activity_date", default=datetime.now())
     stage_id: Mapped[int] = mapped_column("ca_stage_id", ForeignKey("cns_lead_stage_def.ls_stage_id"), nullable=True)
     media_code: Mapped[str] = mapped_column("ca_media_code", ForeignKey("cns_media_def.cm_media_code"), nullable=True)
-
-
-class Account(Base):
-    __tablename__ = "cns_accounts"
-
-    id: Mapped[int] = mapped_column("account_id", primary_key=True)
-    account_name: Mapped[str] = mapped_column("account_name", nullable=True)
-    display_name: Mapped[str] = mapped_column("display_name")
-    account_status: Mapped[bool] = mapped_column("account_status", nullable=False, default=True)
-    account_owner: Mapped[int] = mapped_column("account_owner")
-    account_type: Mapped[int] = mapped_column("account_type", ForeignKey('cns_user_def.cu_user_id'))
-    website: Mapped[str] = mapped_column("website", nullable=False)
-    industry: Mapped[str] = mapped_column("industry")
-    contract_start_date: Mapped[date] = mapped_column("contract_start_dt", default=date.today(), nullable=False)
-    contract_end_date: Mapped[date] = mapped_column("contract_end_dt")
-    job_workflow: Mapped[int] = mapped_column("job_submission_workflow")
-    created_by: Mapped[int] = mapped_column("created_by", nullable=False)
-    created_date: Mapped[datetime] = mapped_column("created_dt", default=datetime.now(), nullable=False)
-    modified_by: Mapped[int] = mapped_column("modified_by")
-    modified_date: Mapped[datetime] = mapped_column("modified_dt")
-
-
-class JobSubmissionWorkflow(Base):
-    __tablename__ = "cns_job_submission_workflow"
-
-    id: Mapped[int] = mapped_column("workflow_id", primary_key=True)
-    name: Mapped[str] = mapped_column("workflow_name")
-
-
-class AccountType(Base):
-    __tablename__ = "cns_account_type"
-
-    id: Mapped[int] = mapped_column("type_id", primary_key=True)
-    code: Mapped[str] = mapped_column("type_code", nullable=False, unique=True)
-    name: Mapped[str] = mapped_column("type_name")
-    is_active: Mapped[bool] = mapped_column("is_active", nullable=False)
