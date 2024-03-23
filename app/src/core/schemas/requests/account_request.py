@@ -30,3 +30,15 @@ class CreateAccountRequest(BaseModel):
     industry: Optional[str] = None
     contract_end_date: Optional[date] = None
     jobs_submission_workflow: Optional[JobsSubmissionWorkflow] = None
+
+
+class UpdateAccountRequest(BaseModel):
+    account_name: Optional[str] = None
+    display_name: Optional[str] = None
+    account_status: Optional[AccountStatus] = None
+    account_owner: Optional[str] = None
+    account_type: Optional[AccountType] = None
+    account_website: Optional[str] = None
+    industry: Optional[str] = None
+    contract_end_date: Optional[date] = None
+    jobs_submission_workflow: Optional[JobsSubmissionWorkflow] = None
