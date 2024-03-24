@@ -24,6 +24,7 @@ from app.src.core.routers.account_routers import account_router
 from app.src.core.routers.analytics_router import analytics_router
 from app.src.core.routers.background_routers import background_router
 from app.src.core.routers.dashboard_routers import dashboard_router
+from app.src.core.routers.job_routers import job_router
 from app.src.core.routers.lead_routers import lead_router
 from app.src.core.routers.media_routers import media_router
 from app.src.core.routers.users_routers import user_router
@@ -57,6 +58,7 @@ application.include_router(dashboard_router, prefix="/dashboard")
 application.include_router(analytics_router, prefix="/analytics")
 application.include_router(background_router, prefix="/background-tasks")
 application.include_router(account_router, prefix="/accounts")
+application.include_router(job_router, prefix="/jobs")
 
 
 @application.get("/", dependencies=[Depends(JWTBearer())], tags=["Home"])

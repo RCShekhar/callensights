@@ -1,7 +1,9 @@
+import logging
 from typing import Dict, Any, Type, Optional
 
 from sqlalchemy import select
 
+from app.src.common.app_logging.logging import logger
 from app.src.common.config.database import Database
 from app.src.common.decorators.db_exception_handlers import handle_db_exception
 from app.src.common.exceptions.exceptions import NoUserFoundException, NoLeadFoundException, NotAssignedToUserException
@@ -62,8 +64,10 @@ class GenericDBRepository:
 
     @handle_db_exception
     def is_admin(self, user_id: str) -> bool:
-        query = select(User.role).where(User.clerk_id == user_id)
-        role, = self.session.execute(query).fetchone()
+        result = self.session.query(User.role).filter_by(clerk_id=user_id).one_or_none()
+        if result is None:
+            return False
+        (role,) = result
         return role == 'ADMIN'
 
     @handle_db_exception
