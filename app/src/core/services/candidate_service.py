@@ -193,6 +193,31 @@ class CandidateService(BaseService):
                 detail="An unexpected error occurred while getting field values for creating a new candidate.",
             )
 
+    def delete_candidate(self, user_id: str, candidate_id: int) -> None:
+        """
+        Delete a candidate from the system.
+
+        :param user_id: The ID of the user deleting the candidate.
+        :param candidate_id: The ID of the candidate to delete.
+        :raises HTTPException: If there is an error deleting the candidate.
+        """
+        self._repository.assume_user_exists(user_id)
+
+        try:
+            self._repository.delete_candidate(candidate_id)
+        except NoResultFound:
+            logger.warning(f"Candidate with ID {candidate_id} does not exist.")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Candidate with ID {candidate_id} does not exist. Please check the ID and try again.",
+            )
+        except Exception as error:
+            logger.error(f"Error deleting candidate with ID {candidate_id}: {error}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error deleting candidate with ID {candidate_id}.",
+            )
+
     def _add_entities(
         self, candidate_id: int, entities: List[BaseModel], entity_name: str
     ) -> None:

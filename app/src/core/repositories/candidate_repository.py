@@ -252,7 +252,6 @@ class CandidateRepository(GenericDBRepository):
             return True
         except NoResultFound:
             self.session.rollback()
-            logger.error(f"No candidate found with ID {candidate_id} to delete.")
             raise ValueError(f"No candidate found with ID {candidate_id} to delete.")
         except Exception as general_exception:
             self.session.rollback()

@@ -94,3 +94,17 @@ async def get_field_values(
 ) -> GetCandidateFieldValuesResponse:
     user_id = decoded_payload.get("user_id")
     return job_service.get_field_values(user_id)
+
+
+@candidate_router.delete(
+    "/{candidate_id}",
+    summary="Delete Candidate",
+    status_code=status.HTTP_200_OK,
+)
+async def delete_candidate(
+    candidate_id: int,
+    decoded_payload: DecodedPayload = Depends(JWTBearer()),
+    candidate_service: CandidateService = Depends(),
+) -> None:
+    user_id = decoded_payload.get("user_id")
+    return candidate_service.delete_candidate(user_id, candidate_id)
