@@ -30,7 +30,7 @@ class AccountService(BaseService):
         self._repository.assume_user_exists(user_id)
 
         account_data = inputs.model_dump()
-        internal_user_id = self._repository.get_internal_user_id(user_id)
+        internal_user_id: Optional[int] = self._repository.get_internal_user_id(user_id)
 
         if internal_user_id is None:
             logger.error(f"Internal user ID for {user_id} could not be resolved.")
@@ -39,7 +39,7 @@ class AccountService(BaseService):
                 detail="Internal User ID could not be resolved.",
             )
 
-        owner_id = account_data.get("account_owner", internal_user_id)
+        owner_id: str = account_data.get("account_owner")
         account_data["account_owner"] = self._resolve_account_owner(
             owner_id, internal_user_id
         )
@@ -209,7 +209,7 @@ class AccountService(BaseService):
                 detail="An unexpected error occurred.",
             )
 
-    def _resolve_account_owner(self, owner_id: str, default_owner_id: str) -> str:
+    def _resolve_account_owner(self, owner_id: str, default_owner_id: int) -> str:
         """Resolve the account owner ID with fallback."""
         resolved_owner_id = self._repository.get_internal_user_id(owner_id)
         return resolved_owner_id if resolved_owner_id is not None else default_owner_id

@@ -28,6 +28,7 @@ from app.src.core.routers.job_routers import job_router
 from app.src.core.routers.lead_routers import lead_router
 from app.src.core.routers.media_routers import media_router
 from app.src.core.routers.users_routers import user_router
+from app.src.core.routers.candidate_routers import candidate_router
 
 application = FastAPI(
     docs_url="/callensights/docs",
@@ -59,6 +60,7 @@ application.include_router(analytics_router, prefix="/analytics")
 application.include_router(background_router, prefix="/background-tasks")
 application.include_router(account_router, prefix="/accounts")
 application.include_router(job_router, prefix="/jobs")
+application.include_router(candidate_router, prefix="/candidate")
 
 
 @application.get("/", dependencies=[Depends(JWTBearer())], tags=["Home"])
