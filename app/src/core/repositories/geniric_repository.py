@@ -1,11 +1,13 @@
-from typing import Dict, Any, Type
+import logging
+from typing import Dict, Any, Type, Optional
 
 from sqlalchemy import select
 
+from app.src.common.app_logging.logging import logger
 from app.src.common.config.database import Database
+from app.src.common.decorators.db_exception_handlers import handle_db_exception
 from app.src.common.exceptions.exceptions import NoUserFoundException, NoLeadFoundException, NotAssignedToUserException
 from app.src.core.models.db_models import Base, Activity, Lead, User, Media
-from app.src.common.decorators.db_exception_handlers import handle_db_exception
 
 
 class GenericDBRepository:
@@ -62,15 +64,22 @@ class GenericDBRepository:
 
     @handle_db_exception
     def is_admin(self, user_id: str) -> bool:
-        query = select(User.role).where(User.clerk_id == user_id)
-        role, = self.session.execute(query).fetchone()
+        result = self.session.query(User.role).filter_by(clerk_id=user_id).one_or_none()
+        if result is None:
+            return False
+        (role,) = result
         return role == 'ADMIN'
 
     @handle_db_exception
-    def get_internal_user_id(self, clerk_id: str) -> int:
+    def get_internal_user_id(self, clerk_id: str) -> Optional[int]:
         query = select(User.id).where(User.clerk_id == clerk_id)
-        uid, = self.session.execute(query).fetchone()
-        return uid
+        result = self.session.execute(query).fetchone()
+
+        if result is not None:
+            (uid,) = result
+            return uid
+        else:
+            return None
 
     @handle_db_exception
     def assume_lead_assigned_to(self, lead_id: int, user_id: str) -> None:
@@ -101,6 +110,6 @@ class GenericDBRepository:
 
     @handle_db_exception
     def get_media_internal_id(self, media_code: str) -> int:
-        query = select(Media.id.label("id")).where(Media.media_code==media_code)
+        query = select(Media.id.label("id")).where(Media.media_code == media_code)
         result = self.session.execute(query).fetchone()
         return result._asdict()['id']
