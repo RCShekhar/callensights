@@ -5,7 +5,6 @@ from app.src.common.security.authorization import JWTBearer, DecodedPayload
 from app.src.core.schemas.requests.candidate_request import (
     CreateCandidateRequest,
     UpdateCandidateRequest,
-    UpdateCandidateResumeModel,
 )
 from app.src.core.schemas.responses.candidate_response import (
     CandidateFormattedResponseModel,
@@ -31,6 +30,20 @@ async def create_candidate(
 ) -> CreateCandidateResponse:
     user_id = decoded_payload.get("user_id")
     return candidate_service.add_candidate(user_id, candidate_input)
+
+
+@candidate_router.get(
+    "/create",
+    summary="Get Candidate Field Values",
+    response_model=GetCandidateFieldValuesResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_field_values(
+    decoded_payload: DecodedPayload = Depends(JWTBearer()),
+    job_service: CandidateService = Depends(),
+) -> GetCandidateFieldValuesResponse:
+    user_id = decoded_payload.get("user_id")
+    return job_service.get_field_values(user_id)
 
 
 @candidate_router.get(
@@ -80,20 +93,6 @@ async def update_candidate(
 ) -> None:
     user_id = decoded_payload.get("user_id")
     return candidate_service.update_candidate(user_id, candidate_id, candidate_input)
-
-
-@candidate_router.get(
-    "/create",
-    summary="Get Candidate Field Values",
-    response_model=GetCandidateFieldValuesResponse,
-    status_code=status.HTTP_200_OK,
-)
-async def get_field_values(
-    decoded_payload: DecodedPayload = Depends(JWTBearer()),
-    job_service: CandidateService = Depends(),
-) -> GetCandidateFieldValuesResponse:
-    user_id = decoded_payload.get("user_id")
-    return job_service.get_field_values(user_id)
 
 
 @candidate_router.delete(

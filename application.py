@@ -20,6 +20,7 @@ from app.src.common.exceptions.exception_handlers import (
     validation_exception_handler,
 )
 from app.src.common.security.authorization import JWTBearer
+from app.src.core.routers.submission_router import submission_router
 from app.src.core.routers.account_routers import account_router
 from app.src.core.routers.analytics_router import analytics_router
 from app.src.core.routers.background_routers import background_router
@@ -61,6 +62,7 @@ application.include_router(background_router, prefix="/background-tasks")
 application.include_router(account_router, prefix="/accounts")
 application.include_router(job_router, prefix="/jobs")
 application.include_router(candidate_router, prefix="/candidate")
+application.include_router(submission_router, prefix="/submission")
 
 
 @application.get("/", dependencies=[Depends(JWTBearer())], tags=["Home"])

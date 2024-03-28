@@ -134,3 +134,4 @@ class GetCandidateFieldValuesResponse(BaseModel):
     source: List[SelectResponse]
     work_authorization: List[SelectResponse]
     employment_types: List[SelectResponse]
+    accounts: List[SelectResponse]

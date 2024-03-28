@@ -8,6 +8,7 @@ from starlette import status
 from app.src.common.app_logging.logging import logger
 from app.src.core.models.ats.candidate_model import CandidateSkill, CandidateSoftSkill
 from app.src.core.repositories.candidate_repository import CandidateRepository
+from app.src.core.repositories.job_repository import JobRepository
 from app.src.core.schemas.requests.candidate_request import (
     CreateCandidateRequest,
     UpdateCandidateRequest,
@@ -25,12 +26,17 @@ class CandidateService(BaseService):
     Service for handling operations related to candidates.
     """
 
-    def __init__(self, repository: CandidateRepository = Depends()):
+    def __init__(
+        self,
+        repository: CandidateRepository = Depends(),
+        job_repository: JobRepository = Depends(),
+    ):
         """
         Initialize the CandidateService with a repository for persistence.
         """
         super().__init__("Candidates")
         self._repository = repository
+        self._job_repository = job_repository
 
     def add_candidate(self, user_id: str, inputs: CreateCandidateRequest):
         """
@@ -176,13 +182,15 @@ class CandidateService(BaseService):
             source = self._repository.get_source_list()
             work_authorization = self._repository.get_work_authorization_list()
             employment_types = self._repository.get_employment_type_list()
-            fields_values = {
+            accounts = self._job_repository.get_accounts_list()
+            field_values = {
                 "source": source,
+                "accounts": accounts,
                 "work_authorization": work_authorization,
                 "employment_types": employment_types,
             }
 
-            return GetCandidateFieldValuesResponse.model_validate(fields_values)
+            return GetCandidateFieldValuesResponse.model_validate(field_values)
 
         except Exception as error:
             logger.error(

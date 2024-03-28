@@ -113,6 +113,7 @@ class Candidate(Base):
     certifications = relationship("Certification", back_populates="candidates")
     skills = relationship("CandidateSkill", back_populates="candidate")
     soft_skills = relationship("CandidateSoftSkill", back_populates="candidate")
+    submissions = relationship("Submission", back_populates="candidate")
     modified_at: Mapped[DateTime] = Column(
         DateTime, default=func.now(), onupdate=func.now()
     )
@@ -247,7 +248,9 @@ class Certification(Base):
 
 class CandidateDocument(Base):
     __tablename__ = "candidate_documents"
-    id: Mapped[int] = Column("document_id", Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = Column(
+        "document_id", Integer, primary_key=True, autoincrement=True
+    )
     candidate_id: Mapped[int] = Column(
         Integer, ForeignKey("candidate.candidate_id"), nullable=False
     )

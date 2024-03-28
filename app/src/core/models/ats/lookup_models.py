@@ -80,9 +80,11 @@ class EngagementType(Base):
         Integer, autoincrement=True, primary_key=True
     )
     engagement_type_name: Mapped[str] = Column(String(255), nullable=False)
+    # submission = relationship("Submission", back_populates="engagement_type")
 
 
 class PayType(Base):
     __tablename__ = "pay_types"
     pay_type_id: Mapped[int] = Column(Integer, autoincrement=True, primary_key=True)
     pay_type_name: Mapped[str] = Column(String(255), nullable=False)
+    # submission = relationship("Submission", back_populates="pay_type")

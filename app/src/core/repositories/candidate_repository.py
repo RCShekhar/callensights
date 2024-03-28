@@ -1,6 +1,5 @@
 from typing import Dict, Any, List, Optional, Type, Union
 from pydantic import BaseModel
-from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.orm import joinedload
 from app.src.common.app_logging.logging import logger
@@ -24,7 +23,6 @@ from app.src.core.models.ats.lookup_models import (
 from app.src.core.repositories.geniric_repository import GenericDBRepository
 from app.src.core.schemas.requests.candidate_request import (
     CandidateModel,
-    SkillModel,
     UpdateCandidateRequest,
 )
 from app.src.core.schemas.responses.candidate_response import (
@@ -142,7 +140,6 @@ class CandidateRepository(GenericDBRepository):
             )
             if not candidate:
                 raise NoResultFound(f"No candidate found for ID {candidate_id}")
-            logger.info(f"Updating candidate {candidate_id}")
 
             for key, value in CandidateModel(**update_data).model_dump().items():
                 if hasattr(candidate, key):
@@ -303,7 +300,7 @@ class CandidateRepository(GenericDBRepository):
         employment_types = self.session.query(EmploymentType).distinct().all()
         return [
             SelectResponse.model_validate(
-                {"value": et.type_id, "label": et.type_name}
+                {"value": et.employment_type_id, "label": et.type_name}
             ).model_dump()
             for et in employment_types
         ]
